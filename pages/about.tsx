@@ -9,6 +9,7 @@ import CTA from '@/components/CTA';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { SectionAnimation, FadeIn } from "@/components/ui/animations";
+import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 
 const AboutPage = () => {
   return (
@@ -45,15 +46,21 @@ const AboutPage = () => {
               
               <FadeIn delay={0.3} className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
                 <div>
-                  <div className="text-4xl font-bold text-primary mb-2">100+</div>
+                  <div className="text-4xl font-bold text-primary mb-2">
+                    <AnimatedCounter value={100} suffix="+" duration={2} />
+                  </div>
                   <p className="text-gray-600">Projects Completed</p>
                 </div>
                 <div>
-                  <div className="text-4xl font-bold text-primary mb-2">25+</div>
+                  <div className="text-4xl font-bold text-primary mb-2">
+                    <AnimatedCounter value={25} suffix="+" duration={2} />
+                  </div>
                   <p className="text-gray-600">Team Members</p>
                 </div>
                 <div>
-                  <div className="text-4xl font-bold text-primary mb-2">8+</div>
+                  <div className="text-4xl font-bold text-primary mb-2">
+                    <AnimatedCounter value={8} suffix="+" duration={2} />
+                  </div>
                   <p className="text-gray-600">Years in Business</p>
                 </div>
               </FadeIn>

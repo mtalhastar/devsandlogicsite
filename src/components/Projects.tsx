@@ -78,7 +78,7 @@ const ProjectCard = ({ project }: { project: any }) => {
   return (
     <motion.div 
       layout
-      className="group relative overflow-hidden rounded-xl shadow-sm hover:shadow-xl bg-white border border-gray-100 transition-all duration-300"
+      className="group relative overflow-hidden rounded-xl shadow-sm hover:shadow-xl bg-white border border-gray-100 transition-all duration-300 w-full max-w-full"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -132,12 +132,14 @@ const PortfolioPreview = () => {
     : projects.filter(project => project.category.includes(activeFilter));
 
   return (
-    <section className="section bg-white relative">
-       {/* Decorative background */}
-       <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-       <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+    <section className="section bg-white relative overflow-x-hidden w-full max-w-full">
+       {/* Decorative background - clipped to prevent overflow */}
+       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+         <div className="absolute top-0 right-0 -translate-y-1/2 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50"></div>
+         <div className="absolute bottom-0 left-0 translate-y-1/2 w-96 h-96 bg-purple-50 rounded-full blur-3xl opacity-50"></div>
+       </div>
 
-      <div className="container relative z-10">
+      <div className="container relative z-10 w-full max-w-full overflow-x-hidden">
         <SectionAnimation className="text-center max-w-3xl mx-auto mb-12">
           <h2 className="section-title">Our Recent Projects</h2>
           <p className="section-subtitle">
@@ -165,7 +167,7 @@ const PortfolioPreview = () => {
         {/* Projects Grid */}
         <motion.div 
           layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-full overflow-x-hidden"
         >
           {filteredProjects.map((project) => (
             <ProjectCard key={project.id} project={project} />
