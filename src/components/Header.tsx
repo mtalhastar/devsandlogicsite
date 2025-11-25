@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +24,8 @@ const Header = () => {
     { name: 'Careers', href: '/careers' },
     { name: 'Contact', href: '/contact' },
   ];
+
+  const isActive = (path: string) => router.pathname === path;
 
   return (
     <header 
@@ -43,9 +47,17 @@ const Header = () => {
             <Link
               key={item.name}
               href={item.href}
-              className="font-medium text-gray-600 hover:text-primary transition-colors"
+              className={cn(
+                "font-medium transition-colors relative py-1",
+                isActive(item.href) 
+                  ? "text-primary font-semibold" 
+                  : "text-gray-600 hover:text-primary"
+              )}
             >
               {item.name}
+              {isActive(item.href) && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full" />
+              )}
             </Link>
           ))}
           <Button asChild>
@@ -77,7 +89,10 @@ const Header = () => {
             <Link
               key={item.name}
               href={item.href}
-              className="block py-3 font-medium text-gray-700 hover:text-primary"
+              className={cn(
+                "block py-3 font-medium hover:text-primary",
+                isActive(item.href) ? "text-primary font-semibold" : "text-gray-700"
+              )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.name}
