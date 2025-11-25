@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { ExternalLink, Github, Layers, Layout, Server, Terminal } from 'lucide-react';
+import { SectionAnimation, FadeIn } from "@/components/ui/animations";
 
 // Project data
 const projects = [
@@ -137,21 +138,16 @@ const PortfolioPreview = () => {
        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
       <div className="container relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-          className="text-center max-w-3xl mx-auto mb-12"
-        >
+        <SectionAnimation className="text-center max-w-3xl mx-auto mb-12">
           <h2 className="section-title">Our Recent Projects</h2>
           <p className="section-subtitle">
             From complex backend systems to stunning frontend interfaces, we deliver excellence across the entire stack.
           </p>
-        </motion.div>
+        </SectionAnimation>
 
         {/* Filter Buttons */}
-        <div className="flex flex-wrap justify-center gap-2 mb-12">
+        <FadeIn delay={0.2}>
+          <div className="flex flex-wrap justify-center gap-2 mb-12">
           {categories.map((category) => (
             <Button
               key={category.value}
@@ -163,7 +159,8 @@ const PortfolioPreview = () => {
               {category.label}
             </Button>
           ))}
-        </div>
+          </div>
+        </FadeIn>
 
         {/* Projects Grid */}
         <motion.div 
@@ -176,11 +173,11 @@ const PortfolioPreview = () => {
         </motion.div>
 
         {/* View More Button */}
-        <div className="text-center mt-16">
+        <FadeIn delay={0.4} className="text-center mt-16">
           <Button size="lg" variant="outline" asChild className="min-w-[200px] border-gray-300 hover:bg-gray-50">
             <Link href="/projects">View Full Portfolio</Link>
           </Button>
-        </div>
+        </FadeIn>
       </div>
     </section>
   );

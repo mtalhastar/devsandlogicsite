@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { SectionAnimation, FadeIn } from "@/components/ui/animations";
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -66,26 +66,16 @@ const ContactForm = () => {
   return (
     <section className="section px-8 bg-white">
       <div className="container">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-        >
+        <SectionAnimation>
           <h2 className="section-title">Let's Talk</h2>
           <p className="section-subtitle">
             Ready to discuss your project? Fill the form and Get in touch with our team.
           </p>
-        </motion.div>
+        </SectionAnimation>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 mt-12">
           {/* Contact Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-          >
+          <FadeIn direction="right" delay={0.2}>
             <div>
               <h3 className="text-2xl font-bold mb-6">Get In Touch</h3>
               
@@ -160,15 +150,10 @@ const ContactForm = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </FadeIn>
 
           {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
+          <FadeIn direction="left" delay={0.4}>
             <div className="bg-white rounded-lg shadow-lg p-8">
               <h3 className="text-2xl font-bold mb-6">Send Us a Message</h3>
               
@@ -244,7 +229,7 @@ const ContactForm = () => {
                 </Button>
               </form>
             </div>
-          </motion.div>
+          </FadeIn>
         </div>
       </div>
     </section>

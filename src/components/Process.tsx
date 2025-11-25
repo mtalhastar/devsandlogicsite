@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
+import { SectionAnimation, FadeIn } from "@/components/ui/animations";
 
 const processSteps = [
   {
@@ -70,28 +70,16 @@ const Process = () => {
   return (
     <section className="section px-8 bg-gray-50">
       <div className="container">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-        >
+        <SectionAnimation>
           <h2 className="section-title">Our Process</h2>
           <p className="section-subtitle">
             How we transform your vision into a successful digital product
           </p>
-        </motion.div>
+        </SectionAnimation>
 
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {processSteps.map((step, index) => (
-            <motion.div
-              key={step.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
+            <FadeIn key={step.id} delay={index * 0.1} className="relative">
               <Card className="h-full border-t-4 border-primary">
                 <CardContent className="p-6">
                   <div className="absolute -top-5 left-6 bg-white p-2 rounded-full shadow-md">
@@ -104,7 +92,7 @@ const Process = () => {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </FadeIn>
           ))}
         </div>
       </div>

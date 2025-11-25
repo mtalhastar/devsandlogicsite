@@ -8,6 +8,7 @@ import JobApplicationForm from '@/components/JobApplicationForm';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Check, MapPin, Clock, Briefcase, Users, Heart, Coffee, Zap, ArrowRight } from 'lucide-react';
+import { SectionAnimation, FadeIn } from "@/components/ui/animations";
 
 const CareerPage = () => {
   const jobOpenings = [
@@ -86,12 +87,7 @@ const CareerPage = () => {
           <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-purple-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
           
           <div className="container relative z-10">
-            <motion.div 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-center max-w-4xl mx-auto"
-            >
+            <SectionAnimation className="text-center max-w-4xl mx-auto">
               <Badge className="mb-6 px-4 py-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 border-none text-sm font-medium rounded-full">We're Hiring!</Badge>
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 tracking-tight">
                 Build the Future with <br/>
@@ -105,36 +101,35 @@ const CareerPage = () => {
               <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
                 Join a team of passionate builders creating world-class SaaS products and MVPs. We believe in innovation, collaboration, and code that matters.
               </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <Button size="lg" className="h-12 px-8 text-lg" onClick={() => document.getElementById('openings')?.scrollIntoView({ behavior: 'smooth' })}>
-                  View Open Positions
-                </Button>
-                <Button size="lg" variant="outline" className="h-12 px-8 text-lg">
-                  Learn About Culture
-                </Button>
-              </div>
-            </motion.div>
+              <FadeIn delay={0.3}>
+                <div className="flex flex-wrap justify-center gap-4">
+                  <Button size="lg" className="h-12 px-8 text-lg" onClick={() => document.getElementById('openings')?.scrollIntoView({ behavior: 'smooth' })}>
+                    View Open Positions
+                  </Button>
+                  <Button size="lg" variant="outline" className="h-12 px-8 text-lg">
+                    Learn About Culture
+                  </Button>
+                </div>
+              </FadeIn>
+            </SectionAnimation>
           </div>
         </section>
         
         {/* Company Culture & Benefits */}
         <section className="py-24 bg-white">
           <div className="container">
-            <div className="text-center max-w-3xl mx-auto mb-16">
+            <SectionAnimation className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="section-title">Why Join Us?</h2>
               <p className="section-subtitle">
                 We believe that happy employees do their best work. That's why we offer a supportive environment and great benefits.
               </p>
-            </div>
+            </SectionAnimation>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {benefits.map((benefit, index) => (
-                <motion.div 
+                <FadeIn 
                   key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
+                  delay={index * 0.1}
                   className="bg-gray-50 p-8 rounded-2xl hover:shadow-lg transition-shadow duration-300 border border-gray-100"
                 >
                   <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6 text-primary">
@@ -142,18 +137,12 @@ const CareerPage = () => {
                   </div>
                   <h3 className="text-xl font-bold mb-3">{benefit.title}</h3>
                   <p className="text-gray-600 leading-relaxed">{benefit.desc}</p>
-                </motion.div>
+                </FadeIn>
               ))}
             </div>
             
             {/* Team Image */}
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              viewport={{ once: true }}
-              className="mt-20 rounded-3xl overflow-hidden shadow-2xl relative"
-            >
+            <FadeIn delay={0.6} className="mt-20 rounded-3xl overflow-hidden shadow-2xl relative">
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10"></div>
               <img 
                 src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=2000" 
@@ -164,14 +153,14 @@ const CareerPage = () => {
                 <h3 className="text-3xl font-bold mb-2">A Culture of Collaboration</h3>
                 <p className="text-lg text-white/90">We succeed together. Our diverse team brings unique perspectives to solve complex problems.</p>
               </div>
-            </motion.div>
+            </FadeIn>
           </div>
         </section>
         
         {/* Job Openings */}
         <section id="openings" className="py-24 bg-gray-50">
           <div className="container">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+            <SectionAnimation className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
               <div className="max-w-2xl">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Current Openings</h2>
                 <p className="text-lg text-gray-600">
@@ -179,16 +168,13 @@ const CareerPage = () => {
                 </p>
               </div>
               <Button variant="outline">View All Roles</Button>
-            </div>
+            </SectionAnimation>
             
             <div className="grid gap-6">
               {jobOpenings.map((job, index) => (
-                <motion.div
+                <FadeIn
                   key={job.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
+                  delay={index * 0.1}
                 >
                   <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border-none shadow-sm">
                     <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:items-start">
@@ -232,7 +218,7 @@ const CareerPage = () => {
                       </div>
                     </div>
                   </Card>
-                </motion.div>
+                </FadeIn>
               ))}
             </div>
           </div>
@@ -241,12 +227,12 @@ const CareerPage = () => {
         {/* Application Form */}
         <section id="application-form" className="py-24 bg-white">
           <div className="container max-w-4xl">
-            <div className="text-center mb-12">
+            <SectionAnimation className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Don't See Your Role?</h2>
               <p className="text-lg text-gray-600">
                 We're always looking for talent. Send us your resume and we'll keep you on file.
               </p>
-            </div>
+            </SectionAnimation>
             <div className="bg-gray-50 p-8 md:p-10 rounded-2xl border border-gray-100 shadow-sm">
                <JobApplicationForm />
             </div>

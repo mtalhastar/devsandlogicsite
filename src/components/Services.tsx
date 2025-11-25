@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Code, Rocket, Palette, Server, Globe, Cloud, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { SectionAnimation, FadeIn } from "@/components/ui/animations";
 
 const services = [
   {
@@ -57,28 +57,16 @@ const Services = () => {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
       
       <div className="container relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
+        <SectionAnimation className="text-center mb-16">
           <h2 className="section-title">Our Services</h2>
           <p className="section-subtitle">
             We offer a comprehensive suite of development and design services to bring your digital vision to life
           </p>
-        </motion.div>
+        </SectionAnimation>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
+            <FadeIn key={index} delay={index * 0.1}>
               <Card className="h-full border-none shadow-lg hover:shadow-xl transition-all duration-300 group bg-white overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
                 <CardHeader className="pb-4">
@@ -94,7 +82,7 @@ const Services = () => {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </FadeIn>
           ))}
         </div>
       </div>

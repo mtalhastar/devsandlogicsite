@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Quote, Star } from 'lucide-react';
+import { SectionAnimation, FadeIn } from "@/components/ui/animations";
 
 const testimonials = [
   {
@@ -67,47 +68,31 @@ const Testimonials = () => {
       </div>
 
       <div className="container relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
+        <SectionAnimation className="text-center">
           <h2 className="section-title">Client Testimonials</h2>
           <p className="section-subtitle">
             Hear what our clients have to say about working with Devs & Logic
           </p>
-        </motion.div>
+        </SectionAnimation>
 
         <div className="mt-16">
           {/* Desktop View - Grid Display */}
           <div className="hidden lg:grid grid-cols-3 gap-8">
             {testimonials.slice(0, 3).map((testimonial, index) => (
-              <motion.div
-                key={testimonial.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
+              <FadeIn key={testimonial.id} delay={index * 0.1}>
                 <TestimonialCard testimonial={testimonial} />
-              </motion.div>
+              </FadeIn>
             ))}
           </div>
 
           {/* Mobile and Tablet View - Carousel */}
           <div className="lg:hidden">
             <div className="relative max-w-2xl mx-auto">
-              <motion.div
-                key={testimonials[activeIndex].id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <TestimonialCard testimonial={testimonials[activeIndex]} />
-              </motion.div>
+              <AnimatePresence mode="wait">
+                <FadeIn key={testimonials[activeIndex].id} direction="right">
+                  <TestimonialCard testimonial={testimonials[activeIndex]} />
+                </FadeIn>
+              </AnimatePresence>
 
               {/* Navigation Buttons */}
               <div className="flex justify-center mt-8 gap-4">
@@ -141,11 +126,11 @@ const Testimonials = () => {
         </div>
 
         {/* Additional Testimonials Section */}
-        <div className="mt-16 text-center">
+        <FadeIn delay={0.4} className="mt-16 text-center">
           <a href="/about" className="inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors">
             Read more client success stories <ChevronRight className="w-4 h-4 ml-1" />
           </a>
-        </div>
+        </FadeIn>
       </div>
     </section>
   );
