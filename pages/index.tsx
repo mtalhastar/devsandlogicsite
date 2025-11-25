@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
@@ -11,29 +11,6 @@ import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 
 const IndexPage = () => {
-  useEffect(() => {
-    const handleScroll = () => {
-      const elements = document.querySelectorAll('.animate-on-scroll');
-      elements.forEach(element => {
-        const el = element as HTMLElement;
-        const elementTop = el.getBoundingClientRect().top;
-        const windowHeight = window.innerHeight;
-        if (elementTop < windowHeight * 0.85) {
-          el.classList.add('visible');
-        } else {
-          el.classList.remove('visible');
-        }
-      });
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -45,7 +22,7 @@ const IndexPage = () => {
         <meta name="description" content="Devs & Logic specializes in custom SaaS development and MVP creation. We are the top-rated MVP and SaaS developers with expertise in React, Node.js, and modern web technologies." />
       </Head>
       <Header />
-      <main>
+      <main >
         <Hero />
         <Services />
         <Projects />

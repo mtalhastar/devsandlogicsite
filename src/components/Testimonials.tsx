@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
+import { ChevronLeft, ChevronRight, Quote, Star } from 'lucide-react';
 
 const testimonials = [
   {
@@ -58,13 +59,20 @@ const Testimonials = () => {
   };
 
   return (
-    <section className="section bg-gradient-to-b from-white to-blue-50 py-20">
-      <div className="container">
+    <section className="section px-8 bg-gradient-to-b from-white to-blue-50/30 py-24 relative overflow-hidden">
+       {/* Decorative Background Elements */}
+       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-100/40 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 -left-24 w-72 h-72 bg-purple-100/40 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="container relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
+          className="text-center"
         >
           <h2 className="section-title">Client Testimonials</h2>
           <p className="section-subtitle">
@@ -72,9 +80,9 @@ const Testimonials = () => {
           </p>
         </motion.div>
 
-        <div className="mt-12">
+        <div className="mt-16">
           {/* Desktop View - Grid Display */}
-          <div className="hidden lg:grid grid-cols-3 gap-6">
+          <div className="hidden lg:grid grid-cols-3 gap-8">
             {testimonials.slice(0, 3).map((testimonial, index) => (
               <motion.div
                 key={testimonial.id}
@@ -90,44 +98,40 @@ const Testimonials = () => {
 
           {/* Mobile and Tablet View - Carousel */}
           <div className="lg:hidden">
-            <div className="relative">
+            <div className="relative max-w-2xl mx-auto">
               <motion.div
                 key={testimonials[activeIndex].id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
                 <TestimonialCard testimonial={testimonials[activeIndex]} />
               </motion.div>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-center mt-6 gap-4">
+              <div className="flex justify-center mt-8 gap-4">
                 <button 
                   onClick={handlePrev}
-                  className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:bg-gray-50"
+                  className="w-12 h-12 rounded-full bg-white border border-gray-100 shadow-md flex items-center justify-center hover:bg-gray-50 text-gray-700 transition-colors"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
+                  <ChevronLeft className="w-6 h-6" />
                 </button>
                 <button 
                   onClick={handleNext}
-                  className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center hover:bg-gray-50"
+                  className="w-12 h-12 rounded-full bg-white border border-gray-100 shadow-md flex items-center justify-center hover:bg-gray-50 text-gray-700 transition-colors"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
+                  <ChevronRight className="w-6 h-6" />
                 </button>
               </div>
 
               {/* Dots Indicator */}
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-center mt-6">
                 {testimonials.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setActiveIndex(index)}
-                    className={`mx-1 w-2 h-2 rounded-full ${index === activeIndex ? 'bg-primary' : 'bg-gray-300'}`}
+                    className={`mx-1.5 h-2.5 rounded-full transition-all duration-300 ${index === activeIndex ? 'bg-primary w-8' : 'bg-gray-300 w-2.5'}`}
                     aria-label={`Go to testimonial ${index + 1}`}
                   />
                 ))}
@@ -137,9 +141,9 @@ const Testimonials = () => {
         </div>
 
         {/* Additional Testimonials Section */}
-        <div className="mt-12 text-center">
-          <a href="/about" className="text-primary hover:underline font-medium">
-            Read more client success stories →
+        <div className="mt-16 text-center">
+          <a href="/about" className="inline-flex items-center text-primary hover:text-primary/80 font-medium transition-colors">
+            Read more client success stories <ChevronRight className="w-4 h-4 ml-1" />
           </a>
         </div>
       </div>
@@ -149,26 +153,37 @@ const Testimonials = () => {
 
 const TestimonialCard = ({ testimonial }) => {
   return (
-    <Card className="h-full">
-      <CardContent className="p-6">
-        <div className="flex items-center mb-4">
-          <img 
-            src={testimonial.image} 
-            alt={testimonial.name} 
-            className="w-12 h-12 rounded-full object-cover"
-          />
+    <Card className="h-full border-none shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-xl transition-shadow duration-300">
+      <CardContent className="p-8">
+        <div className="flex items-center mb-6">
+          <div className="relative">
+            <div className="absolute inset-0 bg-blue-200 rounded-full blur-sm opacity-50"></div>
+            <img 
+              src={testimonial.image} 
+              alt={testimonial.name} 
+              className="relative w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
+            />
+          </div>
           <div className="ml-4">
-            <h4 className="font-bold">{testimonial.name}</h4>
-            <p className="text-sm text-gray-600">{testimonial.position}</p>
+            <h4 className="font-bold text-lg leading-tight">{testimonial.name}</h4>
+            <p className="text-sm text-muted-foreground">{testimonial.position}</p>
           </div>
         </div>
-        <svg className="h-8 w-8 text-primary/20 mb-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-        </svg>
-        <p className="text-gray-700">{testimonial.content}</p>
+        
+        <div className="mb-4 flex">
+           {[...Array(5)].map((_, i) => (
+             <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+           ))}
+        </div>
+
+        <Quote className="h-8 w-8 text-primary/10 mb-3 rotate-180" />
+        <p className="text-gray-600 leading-relaxed italic relative z-10">
+          "{testimonial.content}"
+        </p>
       </CardContent>
     </Card>
   );
 };
 
 export default Testimonials;
+

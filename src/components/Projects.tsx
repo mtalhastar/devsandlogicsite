@@ -120,7 +120,7 @@ const PortfolioPreview = () => {
     : projects.filter(project => project.category.includes(activeFilter));
 
   return (
-    <section className="section">
+    <section className="section px-8">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

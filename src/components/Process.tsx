@@ -68,7 +68,7 @@ const processSteps = [
 
 const Process = () => {
   return (
-    <section className="section bg-gray-50">
+    <section className="section px-8 bg-gray-50">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

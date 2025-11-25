@@ -64,7 +64,7 @@ const ContactForm = () => {
   };
 
   return (
-    <section className="section bg-white">
+    <section className="section px-8 bg-white">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
