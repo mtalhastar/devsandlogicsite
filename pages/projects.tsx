@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink } from 'lucide-react';
+import { SectionAnimation, FadeIn } from "@/components/ui/animations";
 
 // Project data
 const projects = [
@@ -187,7 +188,7 @@ const ProjectsPage = () => {
            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-100/50 rounded-full blur-3xl"></div>
            
           <div className="container relative z-10">
-            <div className="text-center max-w-3xl mx-auto">
+            <SectionAnimation className="text-center max-w-3xl mx-auto">
               <Badge className="mb-4 bg-blue-100 text-blue-700 hover:bg-blue-200 border-none px-3 py-1">Our Portfolio</Badge>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
                 Success Stories & <br/>
@@ -196,7 +197,7 @@ const ProjectsPage = () => {
               <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
                 Explore our portfolio of successful digital products we've built for companies across various industries, from DevOps infrastructure to full-stack SaaS applications.
               </p>
-            </div>
+            </SectionAnimation>
           </div>
         </section>
 
@@ -204,18 +205,20 @@ const ProjectsPage = () => {
         <section className="section bg-white">
           <div className="container">
             {/* Filter Buttons */}
-            <div className="flex flex-wrap justify-center gap-2 mb-12">
-              {categories.map((category) => (
-                <Button
-                  key={category.value}
-                  variant={activeFilter === category.value ? "default" : "outline"}
-                  onClick={() => setActiveFilter(category.value)}
-                  className={`rounded-full px-6 ${activeFilter === category.value ? 'shadow-md' : 'border-gray-200 text-gray-900 hover:bg-gray-200 hover:text-gray-900'}`}
-                >
-                  {category.label}
-                </Button>
-              ))}
-            </div>
+            <FadeIn delay={0.2}>
+              <div className="flex flex-wrap justify-center gap-2 mb-12">
+                {categories.map((category) => (
+                  <Button
+                    key={category.value}
+                    variant={activeFilter === category.value ? "default" : "outline"}
+                    onClick={() => setActiveFilter(category.value)}
+                    className={`rounded-full px-6 ${activeFilter === category.value ? 'shadow-md' : 'border-gray-200 text-gray-900 hover:bg-gray-200 hover:text-gray-900'}`}
+                  >
+                    {category.label}
+                  </Button>
+                ))}
+              </div>
+            </FadeIn>
 
             {/* Projects Grid */}
             <motion.div 

@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
+import { SectionAnimation, FadeIn } from "@/components/ui/animations";
 
 const teamMembers = [
   {
@@ -58,27 +58,16 @@ const Team = () => {
   return (
     <section className="section">
       <div className="container">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-        >
+        <SectionAnimation>
           <h2 className="section-title">Our Team</h2>
           <p className="section-subtitle">
             Meet the talented professionals who bring your ideas to life
           </p>
-        </motion.div>
+        </SectionAnimation>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
           {teamMembers.map((member, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
+            <FadeIn key={index} delay={index * 0.1}>
               <Card className="overflow-hidden h-full hover:shadow-lg transition-shadow">
                 <div className="aspect-square overflow-hidden">
                   <img 
@@ -93,7 +82,7 @@ const Team = () => {
                   <p className="text-gray-600 text-sm">{member.bio}</p>
                 </CardContent>
               </Card>
-            </motion.div>
+            </FadeIn>
           ))}
         </div>
       </div>

@@ -16,13 +16,14 @@ const IndexPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      className="overflow-x-hidden w-full max-w-full"
     >
       <Head>
         <title>Devs & Logic | Best MVP & AI SaaS Developers</title>
         <meta name="description" content="Devs & Logic specializes in custom SaaS development and MVP creation. We are the top-rated MVP and SaaS developers with expertise in React, Node.js, and modern web technologies." />
       </Head>
       <Header />
-      <main >
+      <main className="overflow-x-hidden w-full max-w-full">
         <Hero />
         <Services />
         <Projects />

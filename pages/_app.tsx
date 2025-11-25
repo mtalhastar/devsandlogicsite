@@ -22,6 +22,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
+            className="overflow-x-hidden w-full max-w-full"
           >
             <Component {...pageProps} />
           </motion.div>
