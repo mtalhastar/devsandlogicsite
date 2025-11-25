@@ -6,6 +6,10 @@ import Contact from '@/components/Contact';
 import { motion } from 'framer-motion';
 
 const ContactPage = () => {
+  // TODO: Replace with your actual latitude and longitude
+  const latitude = 40.758895;
+  const longitude = -73.987320;
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -43,17 +47,16 @@ const ContactPage = () => {
 
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
               <div className="h-96 w-full">
-                {/* Replace with an actual map component or embed */}
-                <div className="bg-gray-200 h-full w-full flex items-center justify-center">
-                  <div className="text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <p className="text-gray-500">Interactive Map Placeholder</p>
-                    <p className="mt-2 text-gray-600">123 Tech Street, New York, NY 10001</p>
-                  </div>
-                </div>
+                 <iframe 
+                  src={`https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3022.1422937950147!2d${longitude}!3d${latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sus!4v1633023222533!5m2!1sen!2sus`}
+                  width="100%" 
+                  height="100%" 
+                  style={{ border: 0 }} 
+                  allowFullScreen 
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Office Location"
+                ></iframe>
               </div>
             </div>
 
