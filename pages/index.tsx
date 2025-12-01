@@ -1,39 +1,33 @@
-import React from 'react';
-import Head from 'next/head';
-import Header from '@/components/Header';
-import Hero from '@/components/Hero';
-import Services from '@/components/Services';
-import Projects from '@/components/Projects';
-import Testimonials from '@/components/Testimonials';
-import Contact from '@/components/Contact';
-import CTA from '@/components/CTA';
-import Footer from '@/components/Footer';
-import { motion } from 'framer-motion';
+import Navbar from '@/components/landing/Navbar';
+import HeroSection from '@/components/landing/HeroSection';
+import ClientsSection from '@/components/landing/ClientSection';
+import AboutSection from '@/components/landing/AboutSection';
+import PortfolioSection from '@/components/landing/PortfolioSection';
+import ServicesSection from '@/components/landing/ServicesSection';
+import MarqueeSection from '@/components/landing/MarqueeSection';
+import TestimonialsSection from '@/components/landing/TestimonialsSection';
+import ContactSection from '@/components/landing/ContactSection';
+import Footer from '@/components/landing/Footer';
 
-const IndexPage = () => {
+export default function Home() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="overflow-x-hidden w-full max-w-full"
-    >
-      <Head>
-        <title>Devs & Logic | Best MVP & AI SaaS Developers</title>
-        <meta name="description" content="Devs & Logic specializes in custom SaaS development and MVP creation. We are the top-rated MVP and SaaS developers with expertise in React, Node.js, and modern web technologies." />
-      </Head>
-      <Header />
-      <main className="overflow-x-hidden w-full max-w-full">
-        <Hero />
-        <Services />
-        <Projects />
-        <Testimonials />
-        <Contact />
-        <CTA />
-      </main>
+    <div className="bg-black min-h-screen">
+      <Navbar />
+      <HeroSection />
+      <ClientsSection />
+      <div id="about">
+        <AboutSection />
+      </div>
+      <div id="portfolio">
+        <PortfolioSection />
+      </div>
+      <ServicesSection />
+      <MarqueeSection />
+      <div id="testimonials">
+        <TestimonialsSection />
+      </div>
+      <ContactSection />
       <Footer />
-    </motion.div>
+    </div>
   );
-};
-
-export default IndexPage; 
+}
