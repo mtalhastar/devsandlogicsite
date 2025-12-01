@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SectionAnimation } from '@/components/ui/animations';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from 'lucide-react';
 
@@ -41,7 +42,8 @@ export default function HeroSection() {
       />
 
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
+        <SectionAnimation>
+          <div className="max-w-4xl mx-auto text-center">
           {/* Announcement badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -129,7 +131,8 @@ export default function HeroSection() {
               </div>
             ))}
           </motion.div>
-        </div>
+          </div>
+        </SectionAnimation>
       </div>
 
       {/* Bottom gradient fade */}

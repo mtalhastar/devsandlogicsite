@@ -1,10 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
+import { SectionAnimation } from '@/components/ui/animations';
 
 const Footer = () => {
   return (
     <footer className="px-8 bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-16">
+        <SectionAnimation>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4">Devs & Logic</h3>
@@ -64,7 +66,7 @@ const Footer = () => {
               </svg>
             </a>
           </div>
-        </div>
+        </SectionAnimation>
       </div>
     </footer>
   );

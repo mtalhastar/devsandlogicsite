@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { SectionAnimation } from '@/components/ui/animations';
 import { ExternalLink } from 'lucide-react';
 
 const projects = [
@@ -32,7 +33,8 @@ export default function PortfolioSection() {
   return (
     <section className="py-24 bg-black relative overflow-hidden">
       <div className="container mx-auto px-6 lg:px-12">
-        <motion.div
+        <SectionAnimation>
+          <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -46,9 +48,11 @@ export default function PortfolioSection() {
             Real examples of how we've helped businesses achieve their goals 
             with our tailored digital solutions.
           </p>
-        </motion.div>
+          </motion.div>
+        </SectionAnimation>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <SectionAnimation>
+          <div className="grid md:grid-cols-2 gap-8">
           {projects.map((project, idx) => (
             <motion.div
               key={idx}
@@ -96,7 +100,8 @@ export default function PortfolioSection() {
               </div>
             </motion.div>
           ))}
-        </div>
+          </div>
+        </SectionAnimation>
       </div>
     </section>
   );

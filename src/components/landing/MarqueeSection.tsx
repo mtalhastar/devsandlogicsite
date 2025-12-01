@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { SectionAnimation } from '@/components/ui/animations';
 
 export default function MarqueeSection() {
   const words = [
@@ -23,7 +24,8 @@ export default function MarqueeSection() {
       <div className="absolute left-0 top-0 bottom-0 w-40 bg-gradient-to-r from-black to-transparent z-10" />
       <div className="absolute right-0 top-0 bottom-0 w-40 bg-gradient-to-l from-black to-transparent z-10" />
       
-      <div className="flex overflow-hidden">
+      <SectionAnimation>
+        <div className="flex overflow-hidden">
         <motion.div
           animate={{ x: [0, -2000] }}
           transition={{ 
@@ -46,7 +48,8 @@ export default function MarqueeSection() {
             </span>
           ))}
         </motion.div>
-      </div>
+        </div>
+      </SectionAnimation>
     </section>
   );
 }
