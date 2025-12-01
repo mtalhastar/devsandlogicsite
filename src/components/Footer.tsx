@@ -66,6 +66,7 @@ const Footer = () => {
               </svg>
             </a>
           </div>
+          </div>
         </SectionAnimation>
       </div>
     </footer>
