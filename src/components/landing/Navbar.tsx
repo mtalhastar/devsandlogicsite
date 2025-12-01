@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Menu, X } from 'lucide-react';
-
+import Image from 'next/image';
 const navLinks = [
   { name: "Home", href: "#" },
   { name: "About", href: "#about" },
@@ -39,8 +39,8 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-violet-600 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">D</span>
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600/30 to-violet-600/40 flex items-center justify-center">
+                <Image src="/logo.png" alt="Logo" width={24} height={24} />
               </div>
               <span className="text-xl font-bold text-white hidden sm:block">
                 Devs <span className="text-purple-400">&</span> Logics
