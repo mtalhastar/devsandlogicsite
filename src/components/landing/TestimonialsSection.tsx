@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { SectionAnimation, StaggerContainer, StaggerItem } from '@/components/ui/animations';
 import { Star, Quote } from 'lucide-react';
 
 const testimonials = [
@@ -32,7 +33,8 @@ export default function TestimonialsSection() {
   return (
     <section className="py-24 bg-gradient-to-b from-black via-purple-950/20 to-black relative overflow-hidden">
       <div className="container mx-auto px-6 lg:px-12">
-        <motion.div
+        <SectionAnimation className="text-center mb-16">
+          <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -45,18 +47,12 @@ export default function TestimonialsSection() {
           <p className="text-gray-400 max-w-2xl mx-auto text-lg">
             Don't just take our word for it – here's what some of our satisfied clients have to say
           </p>
-        </motion.div>
+          </motion.div>
+        </SectionAnimation>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <StaggerContainer className="grid md:grid-cols-2 gap-6">
           {testimonials.map((testimonial, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="relative p-8 rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300"
-            >
+            <StaggerItem key={idx} className="relative p-8 rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300">
               {/* Quote icon */}
               <Quote className="absolute top-6 right-6 w-10 h-10 text-purple-500/20" />
               
@@ -82,9 +78,9 @@ export default function TestimonialsSection() {
                   <p className="text-purple-400 text-sm">{testimonial.role}</p>
                 </div>
               </div>
-            </motion.div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerContainer>
       </div>
     </section>
   );

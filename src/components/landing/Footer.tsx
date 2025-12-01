@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { SectionAnimation } from '@/components/ui/animations';
 import { Linkedin, Twitter, Github, Instagram } from 'lucide-react';
 
 export default function Footer() {
@@ -20,6 +21,7 @@ export default function Footer() {
   return (
     <footer className="bg-black border-t border-purple-500/10">
       <div className="container mx-auto px-6 lg:px-12 py-16">
+        <SectionAnimation>
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
@@ -41,15 +43,18 @@ export default function Footer() {
               Architecting Tomorrow's Digital Solutions Today.
             </p>
             <div className="flex gap-4">
-              {socialLinks.map((social, idx) => (
-                <a
-                  key={idx}
-                  href={social.href}
-                  className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-gray-400 hover:text-purple-400 hover:bg-purple-500/20 transition-all duration-300"
-                >
-                  <social.icon className="w-5 h-5" />
-                </a>
-              ))}
+              {socialLinks.map((social, idx) => {
+                  const Icon = social.icon;
+                  return (
+                    <a
+                      key={idx}
+                      href={social.href}
+                      className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-gray-400 hover:text-purple-400 hover:bg-purple-500/20 transition-all duration-300"
+                    >
+                      <Icon className="w-5 h-5" />
+                    </a>
+                  );
+                })}
             </div>
           </div>
 
@@ -80,6 +85,7 @@ export default function Footer() {
             <a href="#" className="text-gray-500 hover:text-purple-400 text-sm transition-colors">Terms of Service</a>
           </div>
         </div>
+        </SectionAnimation>
       </div>
     </footer>
   );

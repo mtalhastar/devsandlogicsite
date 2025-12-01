@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { SectionAnimation } from '@/components/ui/animations';
 import { 
   Palette, 
   Layout, 
@@ -54,7 +55,8 @@ export default function ServicesSection() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-3xl" />
       
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
-        <motion.div
+        <SectionAnimation>
+          <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -68,9 +70,11 @@ export default function ServicesSection() {
             We provide comprehensive services from tech to design, 
             delivering end-to-end solutions for your digital needs.
           </p>
-        </motion.div>
+          </motion.div>
+        </SectionAnimation>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <SectionAnimation>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, idx) => (
             <motion.div
               key={idx}
@@ -97,7 +101,8 @@ export default function ServicesSection() {
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-600/0 to-purple-600/0 group-hover:from-purple-600/5 group-hover:to-violet-600/5 transition-all duration-500 pointer-events-none" />
             </motion.div>
           ))}
-        </div>
+          </div>
+        </SectionAnimation>
       </div>
     </section>
   );

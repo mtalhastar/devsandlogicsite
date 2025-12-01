@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { SectionAnimation } from '@/components/ui/animations';
 import { Users, Lightbulb, Target, Globe } from 'lucide-react';
 
 const features = [
@@ -26,7 +27,8 @@ export default function AboutSection() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600/5 rounded-full blur-3xl" />
       
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <SectionAnimation>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left content */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -118,7 +120,8 @@ export default function AboutSection() {
               ))}
             </div>
           </motion.div>
-        </div>
+          </div>
+        </SectionAnimation>
       </div>
     </section>
   );
