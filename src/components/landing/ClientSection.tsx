@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { SectionAnimation } from '@/components/ui/animations';
+import Marquee from '@/components/ui/marquee';
 
 const clients = [
   "TechCorp", "InnovateCo", "StartupX", "DigitalWave", 
@@ -26,22 +27,7 @@ export default function ClientsSection() {
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black to-transparent z-10" />
           
           <div className="flex overflow-hidden">
-            <motion.div
-              animate={{ x: [0, -1920] }}
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              className="flex gap-16 items-center"
-            >
-              {[...clients, ...clients, ...clients].map((client, idx) => (
-                  <div
-                    key={`${client}-${idx}`}
-                  className="flex-shrink-0 px-8 py-4 rounded-xl bg-purple-500/5 border border-purple-500/10 backdrop-blur-sm hover:bg-purple-500/10 transition-all duration-300"
-                >
-                  <span className="text-xl font-semibold text-gray-400 whitespace-nowrap">
-                    {client}
-                  </span>
-                </div>
-              ))}
-            </motion.div>
+            <Marquee items={clients} direction="left" duplicates={3} className="w-full" debug />
           </div>
         </div>
 
@@ -51,22 +37,21 @@ export default function ClientsSection() {
           <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black to-transparent z-10" />
           
           <div className="flex overflow-hidden">
-            <motion.div
-              animate={{ x: [-1920, 0] }}
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              className="flex gap-16 items-center"
-            >
-              {[...clients.slice().reverse(), ...clients, ...clients].map((client, idx) => (
-                  <div
-                    key={`${client}-${idx}`}
+            <Marquee
+              items={clients.slice().reverse()}
+              direction="right"
+              duplicates={3}
+              className="w-full"
+              debug
+              renderItem={(client, idx) => (
+                <div
+                  key={`${client}-${idx}`}
                   className="flex-shrink-0 px-8 py-4 rounded-xl bg-violet-500/5 border border-violet-500/10 backdrop-blur-sm hover:bg-violet-500/10 transition-all duration-300"
                 >
-                  <span className="text-xl font-semibold text-gray-400 whitespace-nowrap">
-                    {client}
-                  </span>
+                  <span className="text-xl font-semibold text-gray-400 whitespace-nowrap">{client}</span>
                 </div>
-              ))}
-            </motion.div>
+              )}
+            />
           </div>
         </div>
       </div>
