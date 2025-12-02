@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/router';
 import { Button } from "@/components/ui/button";
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
@@ -15,6 +16,8 @@ const navLinks = [
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navRef = useRef<HTMLElement | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,11 +27,40 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Scroll helper: offsets by nav height and updates hash in the URL.
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    // Only intercept in-page hashes
+    if (!href || !href.startsWith('#')) return;
+    e.preventDefault();
+    // Special case: Home / empty hash -> scroll top
+    if (href === '#' || href === '#home' || href === '#top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.history.pushState({}, '', '/');
+      setIsMobileMenuOpen(false);
+      return;
+    }
+    const id = href.replace('#', '');
+    const el = document.getElementById(id);
+    if (el) {
+      const offset = navRef.current?.offsetHeight ?? 80; // fallback to 80 if ref missing
+      const top = el.getBoundingClientRect().top + window.pageYOffset - offset - 8; // small padding
+      window.scrollTo({ top, behavior: 'smooth' });
+      // Update URL hash without causing a jump
+      window.history.pushState({}, '', href);
+      setIsMobileMenuOpen(false);
+      return;
+    }
+    // Fallback: route to home with hash if element not present (cross-page)
+    router.push(`/${href}`);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <>
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
+        ref={(el) => { navRef.current = el; }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled 
             ? 'bg-black/80 backdrop-blur-xl border-b border-purple-500/10' 
@@ -53,6 +85,7 @@ export default function Navbar() {
                 <a
                   key={idx}
                   href={link.href}
+                  onClick={(e) => handleNavClick(e, link.href)}
                   className="text-gray-300 hover:text-purple-400 transition-colors text-sm font-medium"
                 >
                   {link.name}
@@ -93,7 +126,7 @@ export default function Navbar() {
                   <a
                     key={idx}
                     href={link.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={(e) => handleNavClick(e, link.href)}
                     className="text-2xl text-white hover:text-purple-400 transition-colors font-medium"
                   >
                     {link.name}

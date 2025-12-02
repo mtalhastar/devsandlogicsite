@@ -4,7 +4,8 @@ import { SectionAnimation } from '@/components/ui/animations';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin, Send, ArrowRight } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, ArrowRight,CircleDollarSign, LinkedinIcon, DollarSign } from 'lucide-react';
+import { TbBrandFiverr } from "react-icons/tb";
 import { toast } from 'sonner';
 
 export default function ContactSection() {
@@ -69,7 +70,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <p className="text-gray-500 text-sm">Email</p>
-                    <p className="text-white">admin@devsandlogics.com</p>
+                    <p className="text-white">mtalhastar@gmail.com</p>
                   </div>
                 </div>
 
@@ -79,7 +80,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <p className="text-gray-500 text-sm">Phone</p>
-                    <p className="text-white">+1 (555) 123-4567</p>
+                    <p className="text-white">+923019497401</p>
                   </div>
                 </div>
 
@@ -87,9 +88,32 @@ export default function ContactSection() {
                   <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
                     <MapPin className="w-6 h-6 text-purple-400" />
                   </div>
+                  
                   <div>
                     <p className="text-gray-500 text-sm">Location</p>
                     <p className="text-white">Remote-First, Worldwide</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                    <LinkedinIcon className="w-6 h-6 text-purple-400" />
+                  </div>
+                  
+                  <div>
+                    <p className="text-gray-500 text-sm">LinkedIn</p>
+                    <p className="text-white">https://www.linkedin.com/in/muhammad-talha-845270230/</p>
+                  </div>
+                </div>
+
+                 <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                    <TbBrandFiverr className="w-6 h-6 text-purple-400" />
+                  </div>
+                  
+                  <div>
+                    <p className="text-gray-500 text-sm">Fiverr</p>
+                    <p className="text-white">https://www.fiverr.com/s/yvg4r55</p>
                   </div>
                 </div>
               </div>

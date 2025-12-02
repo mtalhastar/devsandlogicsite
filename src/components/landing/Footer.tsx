@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { SectionAnimation } from '@/components/ui/animations';
 import { Linkedin, Twitter, Github, Instagram } from 'lucide-react';
-
+import { TbBrandFiverr } from "react-icons/tb";
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -12,9 +12,9 @@ export default function Footer() {
   };
 
   const socialLinks = [
-    { icon: Linkedin, href: "#" },
-    { icon: Twitter, href: "#" },
-    { icon: Github, href: "#" },
+    { icon: Linkedin, href: "https://www.linkedin.com/in/muhammad-talha-845270230/" },
+    { icon: TbBrandFiverr, href: "https://www.fiverr.com/s/yvg4r55" },
+    { icon: Github, href: "https://github.com/DevsandLogics" },
     { icon: Instagram, href: "#" }
   ];
 
@@ -73,6 +73,8 @@ export default function Footer() {
               </ul>
             </div>
           ))}
+
+           
         </div>
 
         {/* Bottom bar */}

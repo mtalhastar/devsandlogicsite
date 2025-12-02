@@ -9,8 +9,7 @@ const services = [
   "Web Platforms",
   "Mobile Apps",
   "AI Solutions",
-  "Cloud Architecture",
-  "Digital Products"
+  "Cloud Architecture"
 ];
 
 export default function HeroSection() {
