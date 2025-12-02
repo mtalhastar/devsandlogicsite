@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { SectionAnimation } from '@/components/ui/animations';
+import { SectionAnimation, StaggerContainer, StaggerItem } from '@/components/ui/animations';
 import { Users, Lightbulb, Target, Globe } from 'lucide-react';
+import Image from 'next/image';
 
 const features = [
   {
@@ -27,21 +28,16 @@ export default function AboutSection() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-600/5 rounded-full blur-3xl" />
       
       <div className="container mx-auto px-6 lg:px-12 relative z-10">
-        <SectionAnimation>
+   
           <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left content */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
+          <SectionAnimation className="">
             <span className="text-purple-400 font-medium mb-4 block">About Us</span>
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
               Pioneering Digital Innovation Across{' '}
               <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
                 30+ Countries
-              </span>
+              </span>  
             </h2>
             <p className="text-gray-400 text-lg leading-relaxed mb-8">
               We're proud to deliver cutting-edge, expert solutions that transform 
@@ -50,36 +46,26 @@ export default function AboutSection() {
               extraordinary results.
             </p>
 
-            <div className="space-y-6">
+            <StaggerContainer className="space-y-6" staggerDelay={0.12}>
               {features.map((feature, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                <StaggerItem key={idx}
                   className="flex gap-4 p-4 rounded-xl bg-purple-500/5 border border-purple-500/10 hover:bg-purple-500/10 transition-all duration-300"
                 >
                   <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-purple-600 to-violet-600 flex items-center justify-center">
                     <feature.icon className="w-6 h-6 text-white" />
+                   
                   </div>
                   <div>
                     <h3 className="text-white font-semibold mb-1">{feature.title}</h3>
                     <p className="text-gray-400 text-sm">{feature.description}</p>
                   </div>
-                </motion.div>
+                </StaggerItem>
               ))}
-            </div>
-          </motion.div>
+            </StaggerContainer>
+          </SectionAnimation>
 
           {/* Right visual - Globe representation */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative"
-          >
+          <SectionAnimation className="relative">
             <div className="aspect-square relative">
               {/* Outer ring */}
               <div className="absolute inset-0 rounded-full border border-purple-500/20 animate-spin-slow" style={{ animationDuration: '30s' }} />
@@ -87,8 +73,12 @@ export default function AboutSection() {
               <div className="absolute inset-8 rounded-full border border-purple-500/40" />
               
               {/* Center globe */}
-              <div className="absolute inset-16 rounded-full bg-gradient-to-br from-purple-600/30 to-violet-600/30 backdrop-blur-sm flex items-center justify-center border border-purple-500/50">
-                <Globe className="w-24 h-24 text-purple-400" />
+              <div className="absolute inset-16 rounded-full bg-gradient-to-br from-purple-600/30 to-violet-600/30 backdrop-blur-sm flex flex-col gap-6 items-center justify-center border border-purple-500/50">
+                {/* <Globe className="w-24 h-24 text-purple-400" /> */}
+                 <Image src={`/owner.png`} alt={"Owner"} width={150} height={150} className='rounded-full'/>
+                 <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent text-xs w-full text-center font-medium">
+                Founder Muhammad Talha
+              </span>
               </div>
 
               {/* Floating dots representing locations */}
@@ -119,9 +109,9 @@ export default function AboutSection() {
                 </motion.div>
               ))}
             </div>
-          </motion.div>
+          </SectionAnimation>
           </div>
-        </SectionAnimation>
+      
       </div>
     </section>
   );
