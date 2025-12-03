@@ -4,7 +4,7 @@ import { SectionAnimation } from '@/components/ui/animations';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin, Send, ArrowRight,CircleDollarSign, LinkedinIcon, DollarSign } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, ArrowRight,CircleDollarSign, LinkedinIcon, DollarSign, Loader2, Building2 } from 'lucide-react';
 import { TbBrandFiverr } from "react-icons/tb";
 import { toast } from 'sonner';
 
@@ -12,13 +12,39 @@ export default function ContactSection() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
+    company: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast.success('Thank you! We will get back to you soon.');
-    setFormData({ name: '', email: '', message: '' });
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Thank you! We will get back to you soon.');
+        setFormData({ name: '', email: '', phone: '', company: '', message: '' });
+      } else {
+        toast.error(data.error || 'Failed to send message. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('An error occurred. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -147,6 +173,24 @@ export default function ContactSection() {
                   />
                 </div>
                 <div>
+                  <Input
+                    type="tel"
+                    placeholder="Your Phone (Optional)"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 h-14 rounded-xl focus:border-purple-500"
+                  />
+                </div>
+                <div>
+                  <Input
+                    type="text"
+                    placeholder="Company Name (Optional)"
+                    value={formData.company}
+                    onChange={(e) => setFormData({...formData, company: e.target.value})}
+                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 h-14 rounded-xl focus:border-purple-500"
+                  />
+                </div>
+                <div>
                   <Textarea
                     placeholder="Tell us about your project..."
                     value={formData.message}
@@ -158,10 +202,20 @@ export default function ContactSection() {
                 <Button 
                   type="submit"
                   size="lg"
-                  className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white h-14 rounded-xl text-lg font-medium"
+                  disabled={isSubmitting}
+                  className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white h-14 rounded-xl text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send Message
-                  <Send className="ml-2 w-5 h-5" />
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                      <Send className="ml-2 w-5 h-5" />
+                    </>
+                  )}
                 </Button>
               </form>
             </motion.div>

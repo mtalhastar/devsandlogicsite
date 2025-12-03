@@ -14,6 +14,34 @@ type ResponseData = {
   error?: string;
 };
 
+// Email validation function
+function isValidEmail(email: string): boolean {
+  if (!email || typeof email !== 'string') {
+    return false;
+  }
+  
+  // RFC 5322 compliant email regex (simplified but effective)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  // Additional checks
+  if (email.length > 254) return false; // Max email length
+  if (email.length < 3) return false; // Min email length
+  
+  // Check for valid domain structure
+  const parts = email.split('@');
+  if (parts.length !== 2) return false;
+  
+  const [localPart, domain] = parts;
+  if (localPart.length === 0 || localPart.length > 64) return false;
+  if (domain.length === 0 || domain.length > 253) return false;
+  
+  // Check domain has at least one dot
+  if (!domain.includes('.')) return false;
+  
+  // Check for valid characters
+  return emailRegex.test(email);
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseData>
@@ -25,22 +53,63 @@ export default async function handler(
 
   const { name, email, phone, company, message } = req.body as FormData;
 
+  // Validate form data
   if (!name || !email || !message) {
     return res.status(400).json({ message: 'Bad Request', error: 'Name, email, and message are required.' });
   }
 
+  // Validate user email format
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ message: 'Bad Request', error: 'Invalid email address format.' });
+  }
+
+  // Validate environment variables
+  if (!process.env.GMAIL_EMAIL || !process.env.GMAIL_APP_PASSWORD) {
+    console.error('Missing email configuration. Please set GMAIL_EMAIL and GMAIL_APP_PASSWORD in your environment variables.');
+    return res.status(500).json({ 
+      message: 'Server configuration error', 
+      error: 'Email service is not properly configured.' 
+    });
+  }
+
+  // Validate Gmail email format
+  if (!isValidEmail(process.env.GMAIL_EMAIL)) {
+    console.error('Invalid GMAIL_EMAIL format in environment variables.');
+    return res.status(500).json({ 
+      message: 'Server configuration error', 
+      error: 'Invalid Gmail email configuration.' 
+    });
+  }
+
+  // Determine receiver email - validate if provided, otherwise use GMAIL_EMAIL
+  let receiverEmail = process.env.GMAIL_EMAIL;
+  if (process.env.CONTACT_FORM_RECEIVE_EMAIL) {
+    if (isValidEmail(process.env.CONTACT_FORM_RECEIVE_EMAIL)) {
+      receiverEmail = process.env.CONTACT_FORM_RECEIVE_EMAIL;
+    } else {
+      console.warn('Invalid CONTACT_FORM_RECEIVE_EMAIL format. Using GMAIL_EMAIL as fallback.');
+    }
+  }
+
+  // Use receiver email as sender email if it's valid and different from GMAIL_EMAIL
+  // Note: Gmail requires authentication, so we still authenticate with GMAIL_EMAIL
+  // but can set the "from" address to receiverEmail if it's a valid Gmail account
+  const senderEmail = isValidEmail(receiverEmail) && receiverEmail !== process.env.GMAIL_EMAIL 
+    ? receiverEmail 
+    : process.env.GMAIL_EMAIL;
+
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.GMAIL_EMAIL,
+      user: process.env.GMAIL_EMAIL, // Always authenticate with GMAIL_EMAIL
       pass: process.env.GMAIL_APP_PASSWORD,
     },
   });
 
   const mailOptions = {
-    from: `"${name}" <${email}>`, // Sender address (appears as "John Doe" <user@example.com>)
+    from: senderEmail, // Use validated receiver email as sender if valid
     replyTo: email, // So you can reply directly to the user's email
-    to: process.env.CONTACT_FORM_RECEIVE_EMAIL, // Your receiving email address from .env.local
+    to: receiverEmail, // Send to validated receiver email
     subject: `New Contact Form Submission from ${name}${company ? ` (${company})` : ''}`,
     text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'N/A'}\nCompany: ${company || 'N/A'}\nMessage: ${message}`,
     html: `
