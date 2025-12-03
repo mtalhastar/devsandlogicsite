@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { SectionAnimation } from '@/components/ui/animations';
 import Link from 'next/link';
 import { ArrowRight, CheckCircle2, Zap, Shield, BarChart } from 'lucide-react';
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
@@ -24,7 +25,8 @@ const Hero = () => {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+        <SectionAnimation>
+          <div className="flex flex-col lg:flex-row items-center gap-19 lg:gap-20">
           {/* Hero Content */}
           <motion.div 
             className="lg:w-1/2"
@@ -145,7 +147,8 @@ const Hero = () => {
               </div>
             </div>
           </motion.div>
-        </div>
+          </div>
+        </SectionAnimation>
       </div>
     </div>
   );
