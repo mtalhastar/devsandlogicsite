@@ -12,142 +12,64 @@ import {
   Zap,
   Database,
   Server,
-  Lock
+  Lock,
+  Brain,
+  Globe,
+  Sparkles
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { caseStudies } from '@/data/caseStudies';
 
-const projects = [
-  {
-    id: 1,
-    title: "FinTech: Global Active-Active Payment Gateway",
-    shortDesc: "Zero-downtime payment processing infrastructure handling 50k+ TPS with PCI-DSS compliance.",
-    icon: Cloud,
-    platform: "AWS",
-    role: "Lead Cloud Architect & DevOps Engineer",
-    challenge: "The client, a global payment processor, faced occasional downtime during regional AWS outages and high latency for cross-border transactions. They required a resilient Multi-Region Active-Active architecture where traffic is routed to the nearest healthy region, ensuring instant failover and data consistency.",
-    solution: [
-      { title: "Architecture", desc: "Implemented a multi-region setup (US-East-1 and EU-West-1) using Route 53 with latency-based routing and health checks to direct traffic." },
-      { title: "Data Consistency", desc: "Deployed DynamoDB Global Tables for multi-master replication to ensure transaction records were synced sub-second across regions." },
-      { title: "Compute", desc: "Used EKS (Elastic Kubernetes Service) with Karpenter for rapid autoscaling of microservices based on pending pod load." },
-      { title: "Security", desc: "Enforced strict network isolation using Transit Gateway and AWS Network Firewall. Implemented mTLS (Mutual TLS) for service-to-service communication using Istio Service Mesh." }
-    ],
+// Map domain to icon
+const domainIcons: Record<string, any> = {
+  'Cloud Engineering': Cloud,
+  'Full Stack Development': Code,
+  'Artificial Intelligence': Brain,
+  'FinTech': Shield,
+  'Healthcare': Shield,
+  'E-Commerce': ShoppingCart,
+  'SaaS / Platform Engineering': Server,
+  'Logistics': Truck,
+};
+
+// Map domain to gradient
+const domainGradients: Record<string, string> = {
+  'Cloud Engineering': 'from-blue-500 to-cyan-500',
+  'Full Stack Development': 'from-purple-500 to-pink-500',
+  'Artificial Intelligence': 'from-emerald-500 to-teal-500',
+  'FinTech': 'from-blue-500 to-indigo-500',
+  'Healthcare': 'from-green-500 to-emerald-500',
+  'E-Commerce': 'from-orange-500 to-red-500',
+  'SaaS / Platform Engineering': 'from-violet-500 to-purple-500',
+  'Logistics': 'from-cyan-500 to-blue-500',
+};
+
+// Transform case studies to match component format
+const projects = caseStudies.map((study, index) => {
+  const Icon = domainIcons[study.domain] || Code;
+  const gradient = domainGradients[study.domain] || 'from-purple-500 to-violet-500';
+  
+  return {
+    id: study.id,
+    title: study.title,
+    shortDesc: study.objective,
+    icon: Icon,
+    platform: study.keyTechnologies.slice(0, 3).join(', '),
+    role: study.role,
+    challenge: study.challenge,
+    solution: study.solution.map((sol, idx) => ({
+      title: `Solution ${idx + 1}`,
+      desc: sol
+    })),
     technologies: {
-      cloud: "AWS (Route 53, EKS, DynamoDB Global Tables, Transit Gateway)",
-      devops: "Terraform (Infrastructure as Code), Helm, Istio",
-      cicd: "GitHub Actions with OPA (Open Policy Agent) for policy enforcement"
+      'Technologies': study.keyTechnologies.join(', ')
     },
-    outcomes: [
-      "Achieved 99.999% availability (Five Nines)",
-      "Reduced cross-border transaction latency by 40%",
-      "Zero downtime recorded during simulated regional failure drills"
-    ],
-    gradient: "from-blue-500 to-cyan-500"
-  },
-  {
-    id: 2,
-    title: "Healthcare: HIPAA-Compliant Telemedicine Platform",
-    shortDesc: "Secure, compliant microservices architecture supporting 10x concurrent video consultations.",
-    icon: Shield,
-    platform: "Azure",
-    role: "Cloud Security Architect",
-    challenge: "A healthcare provider needed to scale their telemedicine app to support 10x concurrent video consultations. Strict HIPAA compliance was non-negotiable, requiring end-to-end encryption, audit trails, and strict data residency controls.",
-    solution: [
-      { title: "Containerization", desc: "Refactored the monolith into domain-driven microservices (Identity, Appointment, Video, Records) deployed on Azure Kubernetes Service (AKS)." },
-      { title: "Security & Compliance", desc: "Implemented Azure Policy to block non-compliant resource creation. Used Azure Key Vault with hardware security modules (HSM) for managing encryption keys." },
-      { title: "Networking", desc: "Private Link was used to ensure database traffic (Azure SQL) never traversed the public internet. App Gateway with WAF protected public endpoints." },
-      { title: "Observability", desc: "Centralized logging with Azure Monitor and Sentinel for automated threat detection and compliance reporting." }
-    ],
-    technologies: {
-      cloud: "Azure (AKS, Azure SQL, Private Link, App Gateway, Sentinel)",
-      devops: "Azure DevOps Pipelines, Bicep (IaC), SonarQube (Static Analysis)",
-      security: "Trivy (Container Scanning), HashiCorp Vault"
-    },
-    outcomes: [
-      "Passed external HIPAA audit with zero critical findings",
-      "Reduced infrastructure costs by 25% via auto-scaling rules",
-      "Deployment time reduced from 2 weeks to 4 hours"
-    ],
-    gradient: "from-purple-500 to-pink-500"
-  },
-  {
-    id: 3,
-    title: "E-Commerce: Serverless Event-Driven Inventory System",
-    shortDesc: "Highly scalable backend handling 1M+ concurrent users during Flash Sales.",
-    icon: ShoppingCart,
-    platform: "GCP",
-    role: "Senior DevOps Engineer",
-    challenge: "The retailer's previous SQL-based inventory system crashed during Black Friday sales due to database locking issues. They needed a non-blocking, asynchronous architecture that scaled to zero during low traffic.",
-    solution: [
-      { title: "Event-Driven Design", desc: "Leveraged Google Cloud Pub/Sub to decouple the checkout service from the inventory service. Orders are pushed to a queue, processed asynchronously, and confirmed via WebSocket." },
-      { title: "Serverless Compute", desc: "Deployed backend logic on Cloud Run (fully managed container environment) to handle massive bursts of HTTP requests instantly." },
-      { title: "Database", desc: "Migrated 'hot' inventory data to Redis (Cloud Memorystore) for sub-millisecond reads and Cloud Spanner for globally consistent transaction handling." },
-      { title: "IaC Strategy", desc: "Used Terraform modules with a 'GitOps' approach to manage GCP resources." }
-    ],
-    technologies: {
-      cloud: "GCP (Cloud Run, Pub/Sub, Cloud Spanner, Cloud Armor)",
-      devops: "Terraform, Docker, Prometheus (managed service)",
-      pattern: "CQRS (Command Query Responsibility Segregation)"
-    },
-    outcomes: [
-      "Successfully handled 1.2 million concurrent users during holiday sale",
-      "60% reduction in cloud spend compared to VM-based setup",
-      "Inventory synchronization errors dropped to near zero"
-    ],
-    gradient: "from-emerald-500 to-teal-500"
-  },
-  {
-    id: 4,
-    title: "SaaS: Internal Developer Platform (IDP)",
-    shortDesc: "Self-service platform reducing developer onboarding from 5 days to 2 hours.",
-    icon: Code,
-    platform: "AWS / Kubernetes",
-    role: "Platform Engineer",
-    challenge: "Developers were spending 30% of their time waiting for Ops to provision environments. The organization needed a 'Golden Path' to allow developers to spin up compliant infrastructure automatically.",
-    solution: [
-      { title: "GitOps Workflow", desc: "Implemented ArgoCD to sync Kubernetes manifests from Git repositories to clusters automatically." },
-      { title: "Self-Service Portal", desc: "Built a customized Backstage portal where developers can request resources (e.g., an S3 bucket or RDS instance)." },
-      { title: "Crossplane Integration", desc: "Used Crossplane within Kubernetes to provision cloud resources (AWS RDS, S3) using Kubernetes YAML manifest files, abstracting the cloud complexity from developers." },
-      { title: "Ephemeral Environments", desc: "Configured automation to spin up temporary 'preview environments' for every Pull Request, which are destroyed automatically on merge." }
-    ],
-    technologies: {
-      tools: "Kubernetes, ArgoCD, Crossplane, Backstage, Helm",
-      cloud: "AWS (underlying provider)",
-      methodology: "GitOps, Platform Engineering"
-    },
-    outcomes: [
-      "Developer onboarding time reduced from 5 days to 2 hours",
-      "Infrastructure ticket volume dropped by 85%",
-      "Deployment frequency increased by 3x"
-    ],
-    gradient: "from-orange-500 to-amber-500"
-  },
-  {
-    id: 5,
-    title: "Logistics: Real-Time IoT Fleet Tracking Pipeline",
-    shortDesc: "Processing telemetry from 10,000+ trucks to optimize routing and fuel consumption.",
-    icon: Truck,
-    platform: "AWS IoT",
-    role: "Big Data Cloud Architect",
-    challenge: "The client was losing data due to connectivity issues and could not process the massive influx of GPS and sensor data (TB/day) fast enough to provide real-time alerts.",
-    solution: [
-      { title: "Ingestion", desc: "Used AWS IoT Core to securely connect devices via MQTT. Implemented Kinesis Data Streams to buffer high-throughput data." },
-      { title: "Processing", desc: "Leveraged Apache Flink (on Amazon EMR) for stateful stream processing (e.g., detecting if a truck idles for >10 mins)." },
-      { title: "Storage & Analytics", desc: "'Hot' data was pushed to OpenSearch for real-time dashboards, while 'Cold' data was offloaded to S3 (Parquet format) for historical analysis using Athena." },
-      { title: "Edge Computing", desc: "Deployed AWS Greengrass on vehicle gateways to process critical alerts locally (e.g., engine overheating) even when offline." }
-    ],
-    technologies: {
-      cloud: "AWS IoT Core, Kinesis, Lambda, EMR (Flink), OpenSearch",
-      devops: "Jenkins, Ansible (for device configuration management)",
-      protocol: "MQTT"
-    },
-    outcomes: [
-      "Fuel costs reduced by 12% through optimized route suggestions",
-      "Real-time visibility into 99.8% of the fleet assets",
-      "Preventative maintenance alerts reduced vehicle breakdowns by 20%"
-    ],
-    gradient: "from-violet-500 to-purple-500"
-  }
-];
+    outcomes: study.businessOutcome,
+    gradient: gradient,
+    domain: study.domain,
+    image: study.image
+  };
+});
 
 function ProjectCard({ project, isExpanded, onToggle }) {
   const Icon = project.icon;
@@ -168,7 +90,12 @@ function ProjectCard({ project, isExpanded, onToggle }) {
               <Icon className="w-7 h-7 text-white" />
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                {project.domain && (
+                  <span className="px-3 py-1 text-xs font-medium text-blue-300 bg-blue-500/20 rounded-full border border-blue-500/30">
+                    {project.domain}
+                  </span>
+                )}
                 <span className="px-3 py-1 text-xs font-medium text-purple-300 bg-purple-500/20 rounded-full border border-purple-500/30">
                   {project.platform}
                 </span>
@@ -271,10 +198,38 @@ function ProjectCard({ project, isExpanded, onToggle }) {
 
 export default function PortfolioSection() {
   const [expandedId, setExpandedId] = useState(null);
+  const [activeFilter, setActiveFilter] = useState<string>('All');
+  const [displayLimit, setDisplayLimit] = useState<number>(5);
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
+
+  // Get unique domains from projects
+  const uniqueDomains = Array.from(new Set(projects.map(p => p.domain))).sort();
+  
+  // Create filter options
+  const filterOptions = [
+    { value: 'All', label: 'All Projects' },
+    ...uniqueDomains.map(domain => ({ value: domain, label: domain }))
+  ];
+
+  // Filter projects based on active filter
+  const filteredProjects = activeFilter === 'All' 
+    ? projects 
+    : projects.filter(project => project.domain === activeFilter);
+
+  // Reset display limit when filter changes
+  const handleFilterChange = (filterValue: string) => {
+    setActiveFilter(filterValue);
+    setDisplayLimit(5); // Reset to show 5 initially
+    setExpandedId(null); // Close any expanded cards
+  };
+
+  // Projects to display (limited or all)
+  const displayedProjects = filteredProjects.slice(0, displayLimit);
+  const hasMoreProjects = filteredProjects.length > displayLimit;
+  const showingAll = displayLimit >= filteredProjects.length;
 
   return (
     <section className="py-24 bg-black relative overflow-hidden">
@@ -289,29 +244,98 @@ export default function PortfolioSection() {
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Case Studies & Projects
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto text-lg">
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg mb-8">
             Real examples of how we've helped businesses achieve their goals
             with our DevOps and cloud architecture solutions.
           </p>
+
+          {/* Filter Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="flex flex-wrap justify-center gap-3 mb-8"
+          >
+            {filterOptions.map((filter) => (
+              <Button
+                key={filter.value}
+                onClick={() => handleFilterChange(filter.value)}
+                variant={activeFilter === filter.value ? "default" : "outline"}
+                className={`rounded-full px-6 py-2 transition-all duration-300 ${
+                  activeFilter === filter.value
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white border-purple-600 shadow-lg shadow-purple-600/30'
+                    : 'bg-purple-600/20 hover:bg-purple-700 text-white border-purple-600 shadow-lg shadow-purple-600/30'
+                }`}
+              >
+                {filter.label}
+                {activeFilter === filter.value && (
+                  <span className="ml-2 text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                    {filter.value === 'All' ? projects.length : filteredProjects.length}
+                  </span>
+                )}
+              </Button>
+            ))}
+          </motion.div>
         </motion.div>
 
-        <div className="space-y-4">
-          {projects.map((project, idx) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
-            >
-              <ProjectCard
-                project={project}
-                isExpanded={expandedId === project.id}
-                onToggle={() => toggleExpand(project.id)}
-              />
-            </motion.div>
-          ))}
-        </div>
+        {/* Projects List */}
+        {filteredProjects.length > 0 ? (
+          <>
+            <div className="space-y-4">
+              {displayedProjects.map((project, idx) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: idx * 0.05 }}
+                >
+                  <ProjectCard
+                    project={project}
+                    isExpanded={expandedId === project.id}
+                    onToggle={() => toggleExpand(project.id)}
+                  />
+                </motion.div>
+              ))}
+            </div>
+
+            {/* See More / Show Less Button */}
+            {hasMoreProjects && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center mt-8"
+              >
+                <Button
+                  onClick={() => setDisplayLimit(showingAll ? 5 : filteredProjects.length)}
+                  size="lg"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 rounded-full text-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-purple-600/30"
+                >
+                  {showingAll ? (
+                    <>
+                      Show Less
+                      <ChevronUp className="ml-2 w-5 h-5" />
+                    </>
+                  ) : (
+                    <>
+                      See More ({filteredProjects.length - displayLimit} more)
+                      <ChevronDown className="ml-2 w-5 h-5" />
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            )}
+          </>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-12"
+          >
+            <p className="text-gray-400 text-lg">No projects found for this category.</p>
+          </motion.div>
+        )}
       </div>
     </section>
   );
