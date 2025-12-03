@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SectionAnimation } from '@/components/ui/animations';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from 'lucide-react';
+import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 
 const services = [
   "SaaS MVPs",
@@ -120,12 +121,18 @@ export default function HeroSection() {
             className="mt-16 grid grid-cols-3 gap-8 max-w-xl mx-auto"
           >
             {[
-              { value: "50+", label: "Projects Delivered" },
-              { value: "30+", label: "Happy Clients" },
-              { value: "5+", label: "Years Experience" }
+              { value: 50, suffix: "+", label: "Projects Delivered" },
+              { value: 30, suffix: "+", label: "Happy Clients" },
+              { value: 5, suffix: "+", label: "Years Experience" }
             ].map((stat, idx) => (
               <div key={idx} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-white mb-1">{stat.value}</div>
+                <div className="text-3xl md:text-4xl font-bold text-white mb-1">
+                  <AnimatedCounter 
+                    value={stat.value} 
+                    suffix={stat.suffix} 
+                    duration={2}
+                  />
+                </div>
                 <div className="text-sm text-gray-500">{stat.label}</div>
               </div>
             ))}

@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import nodemailer from 'nodemailer';
+import connectDB from '@/lib/mongodb';
+import Contact from '@/models/Contact';
 
 type FormData = {
   name: string;
@@ -126,12 +128,42 @@ export default async function handler(
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    return res.status(200).json({ message: 'Email sent successfully!' });
+    // Connect to MongoDB
+    await connectDB();
+
+    // Save contact message to database
+    const contactMessage = new Contact({
+      name,
+      email,
+      phone: phone || undefined,
+      company: company || undefined,
+      message,
+    });
+
+    await contactMessage.save();
+
+    // Send email notification
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (emailError: any) {
+      // Log email error but don't fail the request since message is saved to DB
+      console.error('Error sending email (message saved to database):', emailError);
+    }
+
+    return res.status(200).json({ message: 'Message received and saved successfully!' });
   } catch (error: any) {
-    console.error('Error sending email:', error);
+    console.error('Error processing contact form:', error);
+    
+    // If it's a validation error from MongoDB, return a more specific message
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        message: 'Validation error', 
+        error: Object.values(error.errors).map((e: any) => e.message).join(', ')
+      });
+    }
+
     return res.status(500).json({ 
-      message: 'Error sending email', 
+      message: 'Error processing request', 
       error: error.message || 'Internal Server Error' 
     });
   }
