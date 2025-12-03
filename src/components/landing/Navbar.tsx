@@ -19,6 +19,33 @@ export default function Navbar() {
   const navRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
 
+  const handleBookCall = () => {
+    // Option 1: Use Google Calendar appointment slots (if you have Google Workspace)
+    // Get the appointment slot URL from environment variable
+    const appointmentSlotUrl = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_APPOINTMENT_URL;
+    
+    if (appointmentSlotUrl) {
+      window.open(appointmentSlotUrl, '_blank', 'noopener,noreferrer');
+      setIsMobileMenuOpen(false);
+      return;
+    }
+
+    // Option 2: Create a Google Calendar event with pre-filled details
+    const eventTitle = encodeURIComponent('Consultation Call - Devs & Logic');
+    const eventDetails = encodeURIComponent('Let\'s discuss your project and how we can help bring your ideas to life.');
+    const eventLocation = encodeURIComponent('Online Meeting');
+    const eventDuration = 30; // Duration in minutes
+    
+    // Get your email from environment or use default
+    const yourEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'mtalhastar@gmail.com';
+    
+    // Create Google Calendar event URL
+    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=now/${new Date(Date.now() + eventDuration * 60000).toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${eventDetails}&location=${eventLocation}&add=${yourEmail}`;
+    
+    window.open(googleCalendarUrl, '_blank', 'noopener,noreferrer');
+    setIsMobileMenuOpen(false);
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -95,7 +122,10 @@ export default function Navbar() {
 
             {/* CTA Button */}
             <div className="hidden lg:block">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-6">
+              <Button 
+                onClick={handleBookCall}
+                className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-6"
+              >
                 Book a Call
               </Button>
             </div>
@@ -132,7 +162,10 @@ export default function Navbar() {
                     {link.name}
                   </a>
                 ))}
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-6 py-6 mt-4">
+                <Button 
+                  onClick={handleBookCall}
+                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-6 py-6 mt-4"
+                >
                   Book a Call
                 </Button>
               </div>

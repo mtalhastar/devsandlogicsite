@@ -18,6 +18,32 @@ export default function ContactSection() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const handleBookCall = () => {
+    // Option 1: Use Google Calendar appointment slots (if you have Google Workspace)
+    // Get the appointment slot URL from environment variable
+    const appointmentSlotUrl = process.env.NEXT_PUBLIC_GOOGLE_CALENDAR_APPOINTMENT_URL;
+    
+    if (appointmentSlotUrl) {
+      window.open(appointmentSlotUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Option 2: Create a Google Calendar event with pre-filled details
+    // You can customize these details
+    const eventTitle = encodeURIComponent('Consultation Call - Devs & Logic');
+    const eventDetails = encodeURIComponent('Let\'s discuss your project and how we can help bring your ideas to life.');
+    const eventLocation = encodeURIComponent('Online Meeting');
+    const eventDuration = 30; // Duration in minutes
+    
+    // Get your email from environment or use default
+    const yourEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'mtalhastar@gmail.com';
+    
+    // Create Google Calendar event URL
+    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=now/${new Date(Date.now() + eventDuration * 60000).toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${eventDetails}&location=${eventLocation}&add=${yourEmail}`;
+    
+    window.open(googleCalendarUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -66,6 +92,7 @@ export default function ContactSection() {
             </p>
             <Button 
               size="lg"
+              onClick={handleBookCall}
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 rounded-full text-lg font-medium"
             >
               Book a Call

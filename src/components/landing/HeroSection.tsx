@@ -60,7 +60,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-xl md:text-2xl text-gray-400 mb-4 font-light"
+            className="text-xl md:text-2xl text-gray-400 mb-9 font-light"
           >
             Building Your Vision With
           </motion.h2>

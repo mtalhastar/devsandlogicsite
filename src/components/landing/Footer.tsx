@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { SectionAnimation } from '@/components/ui/animations';
 import { Linkedin, Twitter, Github, Instagram } from 'lucide-react';
 import { TbBrandFiverr } from "react-icons/tb";
+import Image from 'next/image';
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -31,8 +32,8 @@ export default function Footer() {
               viewport={{ once: true }}
               className="flex items-center gap-3 mb-6"
             >
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-violet-600 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">D</span>
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600/30 to-violet-600/40 flex items-center justify-center">
+                <span className="text-white font-bold text-lg"> <Image src="/logo.png" alt="Logo" width={24} height={24} /></span>
               </div>
               <span className="text-2xl font-bold text-white">
                 Devs <span className="text-purple-400">&</span> Logics

@@ -26,7 +26,7 @@ const Hero = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <SectionAnimation>
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+          <div className="flex flex-col lg:flex-row items-center gap-19 lg:gap-20">
           {/* Hero Content */}
           <motion.div 
             className="lg:w-1/2"
