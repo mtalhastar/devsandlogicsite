@@ -3,7 +3,6 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/adminDashboard": "pages/adminDashboard.js",
-  "/api/case-studies/get": "pages/api/case-studies/get.js",
-  "/api/contacts/delete": "pages/api/contacts/delete.js",
-  "/api/contacts/get": "pages/api/contacts/get.js"
+  "/api/contacts/get": "pages/api/contacts/get.js",
+  "/api/case-studies/get": "pages/api/case-studies/get.js"
 }
