@@ -123,7 +123,7 @@ export default function ContactSection() {
                   </div>
                   <div>
                     <p className="text-gray-500 text-sm">Email</p>
-                    <p className="text-white">mtalhastar@gmail.com</p>
+                    <p className="text-white"> admin@devsandlogics.com</p>
                   </div>
                 </div>
 

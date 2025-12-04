@@ -7,6 +7,7 @@ export interface IContact extends Document {
   company?: string;
   message: string;
   status?: 'Received' | 'Progress' | 'Done';
+  is_read?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,6 +47,10 @@ const ContactSchema: Schema = new Schema(
       type: String,
       enum: ['Received', 'Progress', 'Done'],
       default: 'Received',
+    },
+    is_read: {
+      type: Boolean,
+      default: false,
     },
   },
   {
