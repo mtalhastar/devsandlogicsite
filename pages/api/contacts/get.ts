@@ -34,20 +34,40 @@ export default async function handler(
       query.email = email.toLowerCase();
     }
 
-    // Get contacts with pagination
-    const contacts = await Contact.find(query)
-      .sort({ createdAt: -1 }) // Most recent first
-      .skip(skip)
-      .limit(limit)
-      .select('-__v') // Exclude version key
-      .lean(); // Return plain JavaScript objects
+    // Get contacts with pagination (or all if no pagination params)
+    let contacts;
+    if (req.query.page || req.query.limit) {
+      contacts = await Contact.find(query)
+        .sort({ createdAt: -1 }) // Most recent first
+        .skip(skip)
+        .limit(limit)
+        .select('-__v') // Exclude version key
+        .lean(); // Return plain JavaScript objects
+    } else {
+      // Return all contacts if no pagination
+      contacts = await Contact.find(query)
+        .sort({ createdAt: -1 })
+        .select('-__v')
+        .lean();
+    }
+
+    // Transform data to match dashboard format
+    const transformedContacts = contacts.map((contact: any) => ({
+      id: contact._id.toString(),
+      name: contact.name,
+      email: contact.email,
+      message: contact.message,
+      created_date: contact.createdAt,
+      is_read: contact.is_read || false,
+      status: contact.status || 'Received',
+    }));
 
     // Get total count
     const totalCount = await Contact.countDocuments(query);
 
     return res.status(200).json({
       message: 'Contacts retrieved successfully',
-      data: contacts,
+      data: transformedContacts,
       count: totalCount,
     });
   } catch (error: any) {
