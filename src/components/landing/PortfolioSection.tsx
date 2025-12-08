@@ -67,7 +67,7 @@ const projects = caseStudies.map((study, index) => {
     outcomes: study.businessOutcome,
     gradient: gradient,
     domain: study.domain,
-    image: study.image
+    image: study.image || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80'
   };
 });
 
@@ -77,36 +77,47 @@ function ProjectCard({ project, isExpanded, onToggle }) {
   return (
     <motion.div
       layout
-      className="rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300 overflow-hidden"
+      className="group rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300 overflow-hidden"
     >
-      {/* Header - Always visible */}
-      <div
-        className="p-6 cursor-pointer"
-        onClick={onToggle}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4 flex-1">
-            <div className={`flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br ${project.gradient} flex items-center justify-center`}>
-              <Icon className="w-7 h-7 text-white" />
+      {/* Header with Image - Always visible */}
+      <div className="cursor-pointer" onClick={onToggle}>
+        {/* Image Section */}
+        {project.image && (
+          <div className="relative h-64 overflow-hidden">
+            <img 
+              src={project.image} 
+              alt={project.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+            
+            {/* Floating Icon */}
+            <div className={`absolute top-4 right-4 w-12 h-12 rounded-xl bg-gradient-to-br ${project.gradient} flex items-center justify-center shadow-lg`}>
+              <Icon className="w-6 h-6 text-white" />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                {project.domain && (
-                  <span className="px-3 py-1 text-xs font-medium text-blue-300 bg-blue-500/20 rounded-full border border-blue-500/30">
-                    {project.domain}
-                  </span>
-                )}
-                <span className="px-3 py-1 text-xs font-medium text-purple-300 bg-purple-500/20 rounded-full border border-purple-500/30">
-                  {project.platform}
-                </span>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">{project.title}</h3>
-              <p className="text-gray-400 text-sm">{project.shortDesc}</p>
+            
+            {/* Platform Badge */}
+            <div className="absolute top-4 left-4">
+              <span className="px-3 py-1.5 text-xs font-medium text-white bg-black/40 backdrop-blur-md rounded-full border border-white/20">
+                {project.platform}
+              </span>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="text-purple-400 hover:text-purple-300 flex-shrink-0">
-            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-          </Button>
+        )}
+        
+        {/* Content Section */}
+        <div className="p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
+                {project.title}
+              </h3>
+              <p className="text-gray-400 text-sm leading-relaxed">{project.shortDesc}</p>
+            </div>
+            <Button variant="ghost" size="icon" className="text-purple-400 hover:text-purple-300 flex-shrink-0">
+              {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -282,14 +293,14 @@ export default function PortfolioSection() {
         {/* Projects List */}
         {filteredProjects.length > 0 ? (
           <>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {displayedProjects.map((project, idx) => (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.05 }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
                 >
                   <ProjectCard
                     project={project}
