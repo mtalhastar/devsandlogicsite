@@ -2,6 +2,21 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/api/contact": "pages/api/contact.js"
+  "/404": "pages/404.html",
+  "/about": "pages/about.html",
+  "/api/case-studies/create": "pages/api/case-studies/create.js",
+  "/api/case-studies/delete": "pages/api/case-studies/delete.js",
+  "/adminDashboard": "pages/adminDashboard.html",
+  "/api/case-studies/get": "pages/api/case-studies/get.js",
+  "/api/contact": "pages/api/contact.js",
+  "/api/case-studies/update": "pages/api/case-studies/update.js",
+  "/api/contacts/delete": "pages/api/contacts/delete.js",
+  "/api/contacts/save": "pages/api/contacts/save.js",
+  "/api/contacts/get": "pages/api/contacts/get.js",
+  "/api/contacts/mark-read": "pages/api/contacts/mark-read.js",
+  "/api/contacts/update-status": "pages/api/contacts/update-status.js",
+  "/contact": "pages/contact.html",
+  "/": "pages/index.html",
+  "/career": "pages/career.html",
+  "/projects": "pages/projects.html"
 }
