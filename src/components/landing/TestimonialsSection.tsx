@@ -7,25 +7,29 @@ const testimonials = [
     name: "Sarah Johnson",
     role: "CEO, TechVentures",
     content: "Devs and Logics delivered an exceptional product that exceeded our expectations. Their attention to detail and commitment to quality is unmatched.",
-    rating: 5
+    rating: 5,
+    image: "/review (1).png"
   },
   {
     name: "Michael Chen",
     role: "Founder, StartupHub",
     content: "Working with this team was a game-changer for our business. They understood our vision and transformed it into a stunning digital reality.",
-    rating: 5
+    rating: 5,
+    image: "/review (2).png"
   },
   {
     name: "Emily Rodriguez",
     role: "CTO, DataFlow Inc",
     content: "The team's technical expertise and innovative approach helped us build a scalable platform. Highly recommend their services!",
-    rating: 5
+    rating: 5,
+    image: "/review (3).png"
   },
   {
     name: "David Park",
     role: "Product Manager, CloudNine",
     content: "Outstanding communication and delivery. They met all deadlines and the final product was exactly what we envisioned.",
-    rating: 5
+    rating: 5,
+    image: "/review (4).png"
   }
 ];
 
@@ -70,8 +74,12 @@ export default function TestimonialsSection() {
 
               {/* Author */}
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-violet-600 flex items-center justify-center text-white font-bold text-lg">
-                  {testimonial.name.charAt(0)}
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-purple-500/30">
+                  <img 
+                    src={testimonial.image} 
+                    alt={testimonial.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div>
                   <h4 className="text-white font-semibold">{testimonial.name}</h4>

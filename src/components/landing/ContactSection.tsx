@@ -116,73 +116,49 @@ export default function ContactSection() {
                 Reach out and let's start a conversation.
               </p>
 
-              <div className="space-y-4 md:space-y-6">
-                <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-gray-500 text-xs sm:text-sm">Email</p>
-                    <p className="text-white text-sm sm:text-base break-words">admin@devsandlogics.com</p>
-                  </div>
+              <div className="flex flex-wrap gap-4 sm:gap-6 justify-start">
+                <a 
+                  href="mailto:admin@devsandlogics.com"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 flex items-center justify-center hover:bg-purple-500/20 hover:scale-105 transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30 group"
+                  aria-label="Email Us"
+                >
+                  <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 group-hover:text-purple-300" />
+                </a>
+
+                <a 
+                  href="tel:+923019497401"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 flex items-center justify-center hover:bg-purple-500/20 hover:scale-105 transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30 group"
+                  aria-label="Call Us"
+                >
+                  <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 group-hover:text-purple-300" />
+                </a>
+
+                <div 
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/10 cursor-help group relative"
+                  title="Remote-First, Worldwide"
+                >
+                  <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 group-hover:text-purple-300" />
                 </div>
 
-                <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                    <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-gray-500 text-xs sm:text-sm">Phone</p>
-                    <p className="text-white text-sm sm:text-base break-words">+923019497401</p>
-                  </div>
-                </div>
+                <a 
+                  href="https://www.linkedin.com/in/muhammad-talha-845270230/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 flex items-center justify-center hover:bg-purple-500/20 hover:scale-105 transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30 group"
+                  aria-label="LinkedIn Profile"
+                >
+                  <LinkedinIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 group-hover:text-purple-300" />
+                </a>
 
-                <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
-                  </div>
-                  
-                  <div className="min-w-0 flex-1">
-                    <p className="text-gray-500 text-xs sm:text-sm">Location</p>
-                    <p className="text-white text-sm sm:text-base break-words">Remote-First, Worldwide</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                    <LinkedinIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
-                  </div>
-                  
-                  <div className="min-w-0 flex-1">
-                    <p className="text-gray-500 text-xs sm:text-sm">LinkedIn</p>
-                    <a 
-                      href="https://www.linkedin.com/in/muhammad-talha-845270230/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-white text-sm sm:text-base break-all hover:text-purple-400 transition-colors block"
-                    >
-                      linkedin.com/in/muhammad-talha-845270230/
-                    </a>
-                  </div>
-                </div>
-
-                 <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                    <TbBrandFiverr className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
-                  </div>
-                  
-                  <div className="min-w-0 flex-1">
-                    <p className="text-gray-500 text-xs sm:text-sm">Fiverr</p>
-                    <a 
-                      href="https://www.fiverr.com/s/yvg4r55" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-white text-sm sm:text-base break-all hover:text-purple-400 transition-colors block"
-                    >
-                      fiverr.com/s/yvg4r55
-                    </a>
-                  </div>
-                </div>
+                <a 
+                  href="https://www.fiverr.com/s/yvg4r55" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 flex items-center justify-center hover:bg-purple-500/20 hover:scale-105 transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30 group"
+                  aria-label="Fiverr Profile"
+                >
+                  <TbBrandFiverr className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 group-hover:text-purple-300" />
+                </a>
               </div>
             </motion.div>
 
