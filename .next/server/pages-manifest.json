@@ -2,8 +2,5 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/adminDashboard": "pages/adminDashboard.js",
-  "/api/contacts/get": "pages/api/contacts/get.js",
-  "/api/case-studies/get": "pages/api/case-studies/get.js",
-  "/api/case-studies/create": "pages/api/case-studies/create.js"
+  "/": "pages/index.js"
 }
