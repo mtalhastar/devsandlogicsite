@@ -76,7 +76,7 @@ export const caseStudies: CaseStudy[] = [
       'Terraform modules + GitOps for IaC',
     ],
     keyTechnologies: ['GCP', 'Cloud Run', 'Pub/Sub', 'Cloud Spanner', 'Cloud Memorystore', 'Terraform', 'Prometheus'],
-    image: 'https://images.unsplash.com/photo-1508385082359-f1f4a69b6b54?w=1200&q=80',
+    image: 'https://images.unsplash.com/photo-1619243142206-381c5aeda31c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     businessOutcome: [
       'Successfully handled 1.2M concurrent users',
       '60% reduction in cloud spend vs previous VM setup',
@@ -490,7 +490,7 @@ export const caseStudies: CaseStudy[] = [
       'Image generation using DALL-E for visual content',
     ],
     keyTechnologies: ['OpenAI GPT-4', 'Claude', 'DALL-E', 'LangChain', 'Next.js', 'Supabase', 'TypeScript', 'Vercel'],
-    image: 'https://images.unsplash.com/photo-1676299085922-6a98307b2e0e?w=1200&q=80',
+    image: 'https://plus.unsplash.com/premium_photo-1725907643556-e987fab4b09d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     businessOutcome: [
       'Content generation time reduced by 80%',
       '95% of generated content passes quality checks',
