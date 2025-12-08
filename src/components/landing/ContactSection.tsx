@@ -29,14 +29,28 @@ export default function ContactSection() {
     }
 
     // Option 2: Create a Google Calendar event with pre-filled details
-    // You can customize these details
-    const eventTitle = encodeURIComponent('Consultation Call - Devs & Logic');
-    const eventDetails = encodeURIComponent('Let\'s discuss your project and how we can help bring your ideas to life.');
-    const eventLocation = encodeURIComponent('Online Meeting');
-    const eventDuration = 30; // Duration in minutes
+    // All values come from environment variables for easy customization
+    const eventTitle = encodeURIComponent(
+      process.env.NEXT_PUBLIC_CALENDAR_EVENT_TITLE || 'Consultation Call'
+    );
+    const eventDetails = encodeURIComponent(
+      process.env.NEXT_PUBLIC_CALENDAR_EVENT_DETAILS || 'Let\'s discuss your project and how we can help bring your ideas to life.'
+    );
+    const eventLocation = encodeURIComponent(
+      process.env.NEXT_PUBLIC_CALENDAR_EVENT_LOCATION || 'Online Meeting'
+    );
+    const eventDuration = parseInt(
+      process.env.NEXT_PUBLIC_CALENDAR_EVENT_DURATION || '30',
+      10
+    ); // Duration in minutes
     
-    // Get your email from environment or use default
-    const yourEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'mtalhastar@gmail.com';
+    // Get your email from environment variable (required)
+    const yourEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
+    
+    if (!yourEmail) {
+      console.error('NEXT_PUBLIC_CONTACT_EMAIL is not set in environment variables');
+      return;
+    }
     
     // Create Google Calendar event URL
     const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=now/${new Date(Date.now() + eventDuration * 60000).toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${eventDetails}&location=${eventLocation}&add=${yourEmail}`;
