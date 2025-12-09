@@ -7,92 +7,25 @@ import CTA from '@/components/CTA';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Loader2 } from 'lucide-react';
 import { SectionAnimation, FadeIn } from "@/components/ui/animations";
 
-// Project data
-const projects = [
-  {
-    id: 1,
-    title: 'TaskFlow SaaS Platform',
-    description: 'A comprehensive project management SaaS solution with real-time collaboration features, task tracking, and detailed analytics. Built for teams that need powerful project management without the complexity.',
-    image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80',
-    category: ['saas', 'frontend', 'backend', 'full-stack'],
-    technologies: ['React', 'Node.js', 'MongoDB', 'WebSockets'],
-    client: 'TechFlow Inc.',
-    duration: '6 months'
-  },
-  {
-    id: 2,
-    title: 'HealthTrack MVP',
-    description: 'An MVP for a healthcare startup focused on patient engagement and monitoring. Features include appointment scheduling, medication reminders, and secure communication with healthcare providers.',
-    image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80',
-    category: ['mvp', 'mobile-app', 'frontend'],
-    technologies: ['Flutter', 'Firebase', 'Node.js', 'Express'],
-    client: 'HealthTech Solutions',
-    duration: '3 months'
-  },
-  {
-    id: 3,
-    title: 'CloudScale Infrastructure',
-    description: 'Automated cloud infrastructure setup using Terraform and Kubernetes for high availability and auto-scaling capabilities for a high-traffic media platform.',
-    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80',
-    category: ['devops', 'backend'],
-    technologies: ['AWS', 'Terraform', 'Kubernetes'],
-    client: 'MediaStream',
-    duration: '4 months'
-  },
-  {
-    id: 4,
-    title: 'FinTech API Gateway',
-    description: 'High-performance API gateway processing millions of transactions securely. Implemented advanced rate limiting, authentication, and logging.',
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80',
-    category: ['backend', 'fintech', 'saas'],
-    technologies: ['Go', 'gRPC', 'PostgreSQL'],
-    client: 'SecurePay',
-    duration: '8 months'
-  },
-  {
-    id: 5,
-    title: 'Modern E-Commerce UI',
-    description: 'A pixel-perfect, responsive e-commerce frontend with advanced filtering, animations, and optimized performance for conversion.',
-    image: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&q=80',
-    category: ['frontend', 'e-commerce'],
-    technologies: ['Next.js', 'Tailwind CSS', 'Framer Motion'],
-    client: 'FashionNova',
-    duration: '3 months'
-  },
-  {
-    id: 6,
-    title: 'CI/CD Pipeline Automation',
-    description: 'Complete DevOps pipeline automation reducing deployment time by 80% and ensuring consistent environments across development, staging, and production.',
-    image: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&q=80',
-    category: ['devops', 'backend'],
-    technologies: ['Jenkins', 'Docker', 'Ansible'],
-    client: 'SoftwareHouse',
-    duration: '2 months'
-  },
-  {
-    id: 7,
-    title: 'HR Management System',
-    description: 'A comprehensive HR platform for mid-sized businesses with employee onboarding, time tracking, performance reviews, and automated payroll processing features.',
-    image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80',
-    category: ['saas', 'enterprise', 'full-stack'],
-    technologies: ['React', 'Java Spring', 'PostgreSQL', 'Docker'],
-    client: 'HR Solutions Pro',
-    duration: '9 months'
-  },
-  {
-    id: 8,
-    title: 'Event Management Platform',
-    description: 'An end-to-end event planning and management platform with ticketing, attendee management, event promotion tools, and post-event analytics for event organizers.',
-    image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&q=80',
-    category: ['saas', 'service', 'frontend'],
-    technologies: ['Next.js', 'Express', 'MongoDB', 'Stripe API'],
-    client: 'EventPro Group',
-    duration: '6 months'
-  }
-];
+interface CaseStudy {
+  id: string;
+  title: string;
+  short_description: string;
+  platform: string;
+  role?: string;
+  icon: string;
+  gradient: string;
+  challenge: string;
+  solutions: Array<{ title: string; description: string }>;
+  technologies: Array<{ category: string; value: string }>;
+  outcomes: string[];
+  imageUrl?: string;
+  is_published: boolean;
+  created_date: string;
+}
 
 // Categories for filtering
 const categories = [
@@ -106,7 +39,40 @@ const categories = [
   { value: 'fintech', label: 'FinTech' },
 ];
 
+// Helper function to derive categories from platform and technologies
+const deriveCategories = (platform: string, technologies: Array<{ category: string; value: string }>): string[] => {
+  const categories: string[] = [];
+  const platformLower = platform.toLowerCase();
+  const techValues = technologies.map(t => t.value.toLowerCase()).join(' ');
+
+  if (platformLower.includes('web') || platformLower.includes('frontend') || techValues.includes('react') || techValues.includes('next.js') || techValues.includes('vue') || techValues.includes('angular')) {
+    categories.push('frontend');
+  }
+  if (platformLower.includes('backend') || platformLower.includes('api') || techValues.includes('node') || techValues.includes('express') || techValues.includes('python') || techValues.includes('java')) {
+    categories.push('backend');
+  }
+  if (platformLower.includes('devops') || platformLower.includes('cloud') || techValues.includes('aws') || techValues.includes('azure') || techValues.includes('kubernetes') || techValues.includes('docker')) {
+    categories.push('devops');
+  }
+  if (platformLower.includes('saas') || platformLower.includes('platform')) {
+    categories.push('saas');
+  }
+  if (platformLower.includes('mvp') || platformLower.includes('startup')) {
+    categories.push('mvp');
+  }
+  if (platformLower.includes('mobile') || techValues.includes('react native') || techValues.includes('flutter') || techValues.includes('ios') || techValues.includes('android')) {
+    categories.push('mobile-app');
+  }
+  if (platformLower.includes('fintech') || platformLower.includes('payment') || platformLower.includes('financial')) {
+    categories.push('fintech');
+  }
+
+  return categories.length > 0 ? categories : ['full-stack'];
+};
+
 const ProjectCard = ({ project }: { project: any }) => {
+  const defaultImage = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80';
+  
   return (
     <motion.div 
       layout
@@ -118,9 +84,12 @@ const ProjectCard = ({ project }: { project: any }) => {
       <div className="relative h-64 overflow-hidden">
         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 z-10 transition-colors duration-300"></div>
         <img 
-          src={project.image} 
+          src={project.image || defaultImage} 
           alt={project.title} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = defaultImage;
+          }}
         />
         <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-[-10px] group-hover:translate-y-0">
            <Button size="icon" variant="secondary" className="rounded-full h-10 w-10 bg-white text-black hover:bg-blue-50 hover:text-blue-600" asChild>
@@ -142,10 +111,11 @@ const ProjectCard = ({ project }: { project: any }) => {
 
         <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{project.title}</h3>
         
-        <div className="flex items-center text-sm text-gray-500 mb-3 space-x-4">
-          <span>Client: {project.client}</span>
-          <span>Duration: {project.duration}</span>
-        </div>
+        {project.role && (
+          <div className="text-sm text-gray-500 mb-3">
+            <span>Role: {project.role}</span>
+          </div>
+        )}
         
         <p className="text-gray-600 mb-4 line-clamp-3 text-sm">{project.description}</p>
         
@@ -163,11 +133,172 @@ const ProjectCard = ({ project }: { project: any }) => {
 };
 
 const ProjectsPage = () => {
+  // Immediate console log to verify component is being called
+  if (typeof window !== 'undefined') {
+    console.log('✅ ProjectsPage function called');
+  }
+  
   const [activeFilter, setActiveFilter] = useState('all');
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Debug: Log when component mounts
+  useEffect(() => {
+    console.log('🚀 ProjectsPage component mounted');
+    if (typeof window !== 'undefined') {
+      console.log('Current URL:', window.location.href);
+    }
+    return () => {
+      console.log('🛑 ProjectsPage component unmounted');
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('📡 useEffect triggered - starting to fetch case studies');
+    const fetchCaseStudies = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Force console output
+        console.log('='.repeat(50));
+        console.log('🔍 FETCHING CASE STUDIES');
+        console.log('='.repeat(50));
+        console.log('Fetching case studies from /api/case-studies/get...');
+        const response = await fetch('/api/case-studies/get');
+        
+        console.log('Response status:', response.status, response.statusText);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
+          throw new Error(`API returned ${response.status}: ${errorText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Raw API response:', result);
+        console.log('Case studies from API:', result.data);
+        
+        if (!result.data) {
+          console.warn('No data field in API response:', result);
+          setProjects([]);
+          setError('No case studies data received from server');
+          return;
+        }
+
+        // Filter only published case studies and transform to project format
+        const allStudies = result.data || [];
+        console.log('All studies count:', allStudies.length);
+        console.log('All studies with is_published status:', allStudies.map((s: CaseStudy) => ({
+          title: s.title,
+          is_published: s.is_published,
+          is_published_type: typeof s.is_published
+        })));
+        
+        const publishedStudies = allStudies.filter((study: CaseStudy) => {
+          // The API transforms is_published: study.is_published !== false
+          // So undefined/null becomes true, false stays false, true stays true
+          // We just need to check it's not explicitly false
+          const isPublished = study.is_published !== false;
+          console.log(`Study "${study.title}": is_published = ${study.is_published} (${typeof study.is_published}), will show = ${isPublished}`);
+          return isPublished;
+        });
+        
+        console.log('Published studies count:', publishedStudies.length);
+
+        const transformedProjects = publishedStudies
+          .filter((study: CaseStudy) => {
+            // Validate required fields
+            const hasId = !!study.id;
+            const hasTitle = !!study.title;
+            const hasDescription = !!study.short_description;
+            const hasPlatform = !!study.platform;
+            const isValid = hasId && hasTitle && hasDescription && hasPlatform;
+            
+            if (!isValid) {
+              console.warn('Skipping invalid case study:', {
+                id: study.id,
+                title: study.title,
+                short_description: study.short_description,
+                platform: study.platform,
+                hasId,
+                hasTitle,
+                hasDescription,
+                hasPlatform,
+                fullStudy: study
+              });
+            } else {
+              console.log('Valid case study:', study.title);
+            }
+            return isValid;
+          })
+          .map((study: CaseStudy) => {
+            // Ensure technologies is an array
+            const technologies = Array.isArray(study.technologies) ? study.technologies : [];
+            console.log(`Transforming "${study.title}":`, {
+              technologiesCount: technologies.length,
+              technologies: technologies
+            });
+            
+            const categories = deriveCategories(study.platform || '', technologies);
+            const techList = technologies.map((t: any) => {
+              // Handle both object format {category, value} and string format
+              if (typeof t === 'string') {
+                return t;
+              }
+              // Handle Mongoose document format
+              if (t && typeof t === 'object') {
+                return t.value || t.category || JSON.stringify(t);
+              }
+              return String(t);
+            });
+
+            const transformed = {
+              id: study.id,
+              title: study.title || 'Untitled Project',
+              description: study.short_description || '',
+              image: study.imageUrl,
+              category: categories,
+              technologies: techList,
+              role: study.role,
+              platform: study.platform || '',
+            };
+            
+            console.log(`Transformed project "${transformed.title}":`, transformed);
+            return transformed;
+          });
+
+        console.log('Final transformed projects count:', transformedProjects.length);
+        console.log('Transformed projects:', transformedProjects);
+        
+        if (transformedProjects.length === 0 && publishedStudies.length > 0) {
+          console.error('WARNING: Projects were filtered out during transformation!');
+          console.error('Published studies that were filtered:', publishedStudies);
+        }
+        
+        setProjects(transformedProjects);
+        setError(null);
+      } catch (err: any) {
+        console.error('Error fetching case studies:', err);
+        setError(err.message || 'Failed to load projects');
+        setProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCaseStudies();
+  }, []);
   
   const filteredProjects = activeFilter === 'all' 
     ? projects 
     : projects.filter((project: any) => project.category.includes(activeFilter));
+
+  // Log render
+  if (typeof window !== 'undefined') {
+    console.log('🎨 ProjectsPage rendering, state:', { loading, projectsCount: projects.length, error });
+  }
 
   return (
     <motion.div
@@ -220,15 +351,61 @@ const ProjectsPage = () => {
               </div>
             </FadeIn>
 
+            {/* Debug Info - Remove this after debugging */}
+            <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 rounded text-sm">
+              <strong>Debug Info:</strong><br/>
+              Component Rendered: ✅<br/>
+              Loading: {loading ? 'Yes' : 'No'}<br/>
+              Projects: {projects.length}<br/>
+              Error: {error || 'None'}<br/>
+              Filter: {activeFilter}<br/>
+              <button 
+                onClick={() => {
+                  console.log('Manual fetch triggered');
+                  fetch('/api/case-studies/get')
+                    .then(r => r.json())
+                    .then(d => {
+                      console.log('Manual fetch result:', d);
+                      alert(`Found ${d.data?.length || 0} case studies`);
+                    })
+                    .catch(e => {
+                      console.error('Manual fetch error:', e);
+                      alert('Error: ' + e.message);
+                    });
+                }}
+                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Test API Manually
+              </button>
+            </div>
+
             {/* Projects Grid */}
-            <motion.div 
-              layout
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            >
-              {filteredProjects.map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </motion.div>
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <span className="ml-4">Loading projects...</span>
+              </div>
+            ) : error ? (
+              <div className="text-center py-20">
+                <p className="text-red-600 mb-4">{error}</p>
+                <Button onClick={() => window.location.reload()} variant="outline">
+                  Try Again
+                </Button>
+              </div>
+            ) : filteredProjects.length === 0 ? (
+              <div className="text-center py-20">
+                <p className="text-gray-600">No projects found{activeFilter !== 'all' ? ` in ${activeFilter} category` : ''}.</p>
+              </div>
+            ) : (
+              <motion.div 
+                layout
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              >
+                {filteredProjects.map((project) => (
+                  <ProjectCard key={project.id} project={project} />
+                ))}
+              </motion.div>
+            )}
           </div>
         </section>
 
