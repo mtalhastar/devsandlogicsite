@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   Plus, 
   Mail, 
@@ -162,6 +163,7 @@ export default function AdminDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [editingStudy, setEditingStudy] = useState<CaseStudy | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     short_description: '',
@@ -613,7 +615,7 @@ export default function AdminDashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className={`group p-5 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:shadow-lg ${
+                    className={`group p-5 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:shadow-lg overflow-hidden ${
                       msg.is_read 
                         ? 'bg-white/[0.02] border-white/5 hover:border-white/10' 
                         : 'bg-purple-500/5 border-purple-500/20 hover:border-purple-500/40 shadow-lg shadow-purple-500/5'
@@ -625,7 +627,7 @@ export default function AdminDashboard() {
                       }`}>
                         {msg.name.charAt(0).toUpperCase()}
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 overflow-hidden">
                         <div className="flex items-center gap-3 mb-1 flex-wrap">
                           <span className="font-semibold text-white">{msg.name}</span>
                           {!msg.is_read && (
@@ -652,7 +654,41 @@ export default function AdminDashboard() {
                           <span>•</span>
                           <span className="flex-shrink-0">{format(new Date(msg.created_date), 'MMM d, h:mm a')}</span>
                         </div>
-                        <p className="text-gray-300 leading-relaxed mb-3">{msg.message}</p>
+                        <div className="mb-3 break-words">
+                          {(() => {
+                            const words = msg.message.split(' ');
+                            const wordLimit = 20;
+                            const isLong = words.length > wordLimit;
+                            const truncatedText = isLong ? words.slice(0, wordLimit).join(' ') + '...' : msg.message;
+                            const isExpanded = expandedMessageId === msg.id;
+                            
+                            return (
+                              <>
+                                <p 
+                                  className="text-gray-300 leading-relaxed break-words overflow-wrap-anywhere"
+                                  style={{
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    maxWidth: '100%'
+                                  }}
+                                >
+                                  {isExpanded ? msg.message : truncatedText}
+                                </p>
+                                {isLong && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedMessageId(isExpanded ? null : msg.id);
+                                    }}
+                                    className="text-xs text-purple-400 hover:text-purple-300 mt-1 transition-colors font-medium"
+                                  >
+                                    {isExpanded ? 'Show less' : 'Show more'}
+                                  </button>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
                         <div className="flex items-center gap-2">
                           <Select
                             value={msg.status || 'Received'}
