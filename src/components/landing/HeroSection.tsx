@@ -4,6 +4,7 @@ import { SectionAnimation } from '@/components/ui/animations';
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from 'lucide-react';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
+import Link from 'next/link';
 
 const services = [
   "SaaS MVPs",
@@ -97,6 +98,7 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
+            <Link href="#contact">
             <Button 
               size="lg"
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 rounded-full text-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-purple-600/30"
@@ -104,13 +106,17 @@ export default function HeroSection() {
               Get in Touch
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
-            <Button 
+            </Link>
+           <Link href="#portfolio" >
+           <Button 
               size="lg"
               variant="outline"
               className="border-purple-500/50 text-purple-300 hover:bg-purple-500/10 px-8 py-6 rounded-full text-lg font-medium backdrop-blur-sm"
             >
               View Our Work
             </Button>
+           </Link>
+           
           </motion.div>
 
           {/* Stats */}
