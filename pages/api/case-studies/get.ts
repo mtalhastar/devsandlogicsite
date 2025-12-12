@@ -5,6 +5,7 @@ import CaseStudy from '@/models/CaseStudy';
 type ResponseData = {
   message: string;
   data?: any[];
+  count?: number;
   error?: string;
 };
 
@@ -20,22 +21,27 @@ export default async function handler(
   try {
     await connectDB();
 
-    // Get all case studies, sorted by creation date (newest first)
-    const caseStudies = await CaseStudy.find({})
-      .sort({ createdAt: -1 })
-      .select('-__v')
-      .lean();
+    // Get query parameters for pagination
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
 
-    // Debug logging
-    console.log('📊 Total case studies found in DB:', caseStudies.length);
-    caseStudies.forEach((study: any, index: number) => {
-      console.log(`Study ${index + 1}:`, {
-        id: study._id?.toString(),
-        title: study.title,
-        is_published: study.is_published,
-        platform: study.platform
-      });
-    });
+    // Get case studies with pagination (or all if no pagination params)
+    let caseStudies;
+    if (req.query.page || req.query.limit) {
+      caseStudies = await CaseStudy.find({})
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .select('-__v')
+        .lean();
+    } else {
+      // Return all case studies if no pagination
+      caseStudies = await CaseStudy.find({})
+        .sort({ createdAt: -1 })
+        .select('-__v')
+        .lean();
+    }
 
     // Transform data to match dashboard format
     const transformedStudies = caseStudies.map((study: any) => ({
@@ -55,9 +61,13 @@ export default async function handler(
       created_date: study.createdAt,
     }));
 
+    // Get total count
+    const totalCount = await CaseStudy.countDocuments({});
+
     return res.status(200).json({
       message: 'Case studies retrieved successfully',
       data: transformedStudies,
+      count: totalCount,
     });
   } catch (error: any) {
     console.error('Error retrieving case studies:', error);

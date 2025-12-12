@@ -31,7 +31,9 @@ import {
   X as XIcon,
   Database,
   Upload,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -164,6 +166,9 @@ export default function AdminDashboard() {
   const [editingStudy, setEditingStudy] = useState<CaseStudy | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
+  const [messagesPage, setMessagesPage] = useState(1);
+  const [caseStudiesPage, setCaseStudiesPage] = useState(1);
+  const itemsPerPage = 5;
   const [formData, setFormData] = useState({
     title: '',
     short_description: '',
@@ -182,24 +187,32 @@ export default function AdminDashboard() {
 
   const queryClient = useQueryClient();
 
-  // Fetch data
-  const { data: messages = [], isLoading: loadingMessages } = useQuery({
-    queryKey: ['contactMessages'],
+  // Fetch data with pagination
+  const { data: messagesData, isLoading: loadingMessages } = useQuery({
+    queryKey: ['contactMessages', messagesPage],
     queryFn: async () => {
-      const res = await fetch('/api/contacts/get');
+      const res = await fetch(`/api/contacts/get?page=${messagesPage}&limit=${itemsPerPage}`);
       const json = await res.json();
-      return json.data || [];
+      return { data: json.data || [], count: json.count || 0 };
     }
   });
 
-  const { data: caseStudies = [], isLoading: loadingStudies } = useQuery({
-    queryKey: ['caseStudies'],
+  const messages = messagesData?.data || [];
+  const messagesTotal = messagesData?.count || 0;
+  const messagesTotalPages = Math.ceil(messagesTotal / itemsPerPage);
+
+  const { data: caseStudiesData, isLoading: loadingStudies } = useQuery({
+    queryKey: ['caseStudies', caseStudiesPage],
     queryFn: async () => {
-      const res = await fetch('/api/case-studies/get');
+      const res = await fetch(`/api/case-studies/get?page=${caseStudiesPage}&limit=${itemsPerPage}`);
       const json = await res.json();
-      return json.data || [];
+      return { data: json.data || [], count: json.count || 0 };
     }
   });
+
+  const caseStudies = caseStudiesData?.data || [];
+  const caseStudiesTotal = caseStudiesData?.count || 0;
+  const caseStudiesTotalPages = Math.ceil(caseStudiesTotal / itemsPerPage);
 
   // Mutations
   const createStudyMutation = useMutation({
@@ -432,6 +445,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 setActiveTab('messages');
                 setSidebarOpen(false);
+                setMessagesPage(1);
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 activeTab === 'messages' 
@@ -451,6 +465,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 setActiveTab('casestudies');
                 setSidebarOpen(false);
+                setCaseStudiesPage(1);
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 activeTab === 'casestudies' 
@@ -501,8 +516,8 @@ export default function AdminDashboard() {
                   </h1>
                   <p className="text-sm text-gray-500">
                     {activeTab === 'messages' 
-                      ? `${messages.length} total, ${unreadCount} unread` 
-                      : `${caseStudies.length} case studies`}
+                      ? `${messagesTotal} total, ${unreadCount} unread` 
+                      : `${caseStudiesTotal} case studies`}
                   </p>
                 </div>
               </div>
@@ -729,6 +744,14 @@ export default function AdminDashboard() {
                   </motion.div>
                 ))
               )}
+              {/* Messages Pagination */}
+              {messagesTotal > 0 && messagesTotalPages > 0 && (
+                <Pagination
+                  currentPage={messagesPage}
+                  totalPages={messagesTotalPages}
+                  onPageChange={setMessagesPage}
+                />
+              )}
             </div>
           )}
 
@@ -866,6 +889,14 @@ export default function AdminDashboard() {
                         </motion.div>
                       ))}
                       </div>
+                      {/* Case Studies Pagination */}
+                      {caseStudiesTotal > 0 && caseStudiesTotalPages > 0 && (
+                        <Pagination
+                          currentPage={caseStudiesPage}
+                          totalPages={caseStudiesTotalPages}
+                          onPageChange={setCaseStudiesPage}
+                        />
+                      )}
                     </>
                   )}
                 </div>
@@ -891,6 +922,102 @@ export default function AdminDashboard() {
           )}
         </div>
       </main>
+    </div>
+  );
+}
+
+function Pagination({ currentPage, totalPages, onPageChange }: { currentPage: number; totalPages: number; onPageChange: (page: number) => void }) {
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
+  return (
+    <div className="flex items-center justify-center gap-2 mt-6">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="bg-white/5 border-white/10 text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Previous
+      </Button>
+      
+      <div className="flex items-center gap-1">
+        {getPageNumbers().map((page, idx) => {
+          if (page === '...') {
+            return (
+              <span key={`ellipsis-${idx}`} className="px-2 text-gray-500">
+                ...
+              </span>
+            );
+          }
+          
+          const pageNum = page as number;
+          return (
+            <Button
+              key={pageNum}
+              variant={currentPage === pageNum ? "default" : "outline"}
+              size="sm"
+              onClick={() => onPageChange(pageNum)}
+              className={
+                currentPage === pageNum
+                  ? "bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white border-0"
+                  : "bg-white/5 border-white/10 text-white hover:bg-white/10"
+              }
+            >
+              {pageNum}
+            </Button>
+          );
+        })}
+      </div>
+      
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="bg-white/5 border-white/10 text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next
+        <ChevronRight className="w-4 h-4" />
+      </Button>
+      
+      <span className="ml-4 text-sm text-gray-500">
+        Page {currentPage} of {totalPages}
+      </span>
     </div>
   );
 }
