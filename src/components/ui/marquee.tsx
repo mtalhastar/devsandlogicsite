@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { motion, useAnimation } from 'framer-motion'
 
-interface MarqueeProps<T = any> {
+interface MarqueeProps<T = unknown> {
   items: T[]
   renderItem?: (item: T, idx: number) => React.ReactNode
   direction?: 'left' | 'right'
