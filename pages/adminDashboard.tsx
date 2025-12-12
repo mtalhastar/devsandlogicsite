@@ -33,7 +33,8 @@ import {
   Upload,
   Image as ImageIcon,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Star
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -168,6 +169,7 @@ export default function AdminDashboard() {
   const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
   const [messagesPage, setMessagesPage] = useState(1);
   const [caseStudiesPage, setCaseStudiesPage] = useState(1);
+  const [reviewsPage, setReviewsPage] = useState(1);
   const itemsPerPage = 5;
   const [formData, setFormData] = useState({
     title: '',
@@ -213,6 +215,19 @@ export default function AdminDashboard() {
   const caseStudies = caseStudiesData?.data || [];
   const caseStudiesTotal = caseStudiesData?.count || 0;
   const caseStudiesTotalPages = Math.ceil(caseStudiesTotal / itemsPerPage);
+
+  const { data: reviewsData, isLoading: loadingReviews } = useQuery({
+    queryKey: ['reviews', reviewsPage],
+    queryFn: async () => {
+      const res = await fetch(`/api/reviews/get?page=${reviewsPage}&limit=${itemsPerPage}`);
+      const json = await res.json();
+      return { data: json.data || [], count: json.count || 0 };
+    }
+  });
+
+  const reviews = reviewsData?.data || [];
+  const reviewsTotal = reviewsData?.count || 0;
+  const reviewsTotalPages = Math.ceil(reviewsTotal / itemsPerPage);
 
   // Mutations
   const createStudyMutation = useMutation({
@@ -291,6 +306,30 @@ export default function AdminDashboard() {
       return res.json();
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contactMessages'] })
+  });
+
+  const updateReviewStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const res = await fetch(`/api/reviews/update-status?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error('Failed to update review status');
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['reviews'] })
+  });
+
+  const deleteReviewMutation = useMutation({
+    mutationFn: async (id) => {
+      const res = await fetch(`/api/reviews/delete?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to delete review');
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['reviews'] })
   });
 
   const resetForm = () => {
@@ -477,6 +516,26 @@ export default function AdminDashboard() {
               <span>Case Studies</span>
               <span className="ml-auto text-xs text-gray-500">{caseStudies.length}</span>
             </button>
+            <button
+              onClick={() => {
+                setActiveTab('reviews');
+                setSidebarOpen(false);
+                setReviewsPage(1);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                activeTab === 'reviews' 
+                  ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' 
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <MessageSquare className="w-5 h-5" />
+              <span>Reviews</span>
+              {reviews.filter((r: any) => r.status === 'pending').length > 0 && (
+                <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-yellow-500 text-white rounded-full">
+                  {reviews.filter((r: any) => r.status === 'pending').length}
+                </span>
+              )}
+            </button>
           </nav>
         </div>
 
@@ -512,11 +571,13 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">
-                    {activeTab === 'messages' ? 'Messages' : 'Case Studies'}
+                    {activeTab === 'messages' ? 'Messages' : activeTab === 'reviews' ? 'Reviews' : 'Case Studies'}
                   </h1>
                   <p className="text-sm text-gray-500">
                     {activeTab === 'messages' 
                       ? `${messagesTotal} total, ${unreadCount} unread` 
+                      : activeTab === 'reviews'
+                      ? `${reviewsTotal} total reviews`
                       : `${caseStudiesTotal} case studies`}
                   </p>
                 </div>
@@ -919,6 +980,168 @@ export default function AdminDashboard() {
                 />
               )}
             </>
+          )}
+
+          {/* Reviews Content */}
+          {activeTab === 'reviews' && (
+            <div className="space-y-4">
+              {loadingReviews ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="text-center py-20">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                    <MessageSquare className="w-8 h-8 text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">No reviews yet</h3>
+                  <p className="text-gray-500">Reviews from your website will appear here</p>
+                </div>
+              ) : (
+                <>
+                  {reviews.map((review, idx) => (
+                    <motion.div
+                      key={review.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className={`group p-5 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:shadow-lg overflow-hidden ${
+                        review.status === 'approved'
+                          ? 'bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40'
+                          : review.status === 'rejected'
+                          ? 'bg-red-500/5 border-red-500/20 hover:border-red-500/40'
+                          : 'bg-yellow-500/5 border-yellow-500/20 hover:border-yellow-500/40'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        {review.imageUrl ? (
+                          <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden border border-purple-500/30">
+                            <img 
+                              src={review.imageUrl} 
+                              alt={review.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold ${
+                            review.status === 'approved'
+                              ? 'bg-gradient-to-br from-emerald-600 to-teal-600 text-white'
+                              : review.status === 'rejected'
+                              ? 'bg-gradient-to-br from-red-600 to-rose-600 text-white'
+                              : 'bg-gradient-to-br from-yellow-600 to-amber-600 text-white'
+                          }`}>
+                            {review.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="flex items-center gap-3 mb-1 flex-wrap">
+                            <span className="font-semibold text-white">{review.name}</span>
+                            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                              review.status === 'approved'
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                : review.status === 'rejected'
+                                ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                                : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
+                            }`}>
+                              {review.status.charAt(0).toUpperCase() + review.status.slice(1)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-gray-500 mb-3 flex-wrap">
+                            {review.email && (
+                              <>
+                                <a href={`mailto:${review.email}`} className="hover:text-purple-400 transition-colors truncate">
+                                  {review.email}
+                                </a>
+                                <span>•</span>
+                              </>
+                            )}
+                            {(review.role || review.company) && (
+                              <>
+                                <span className="flex-shrink-0">
+                                  {review.role || ''}
+                                  {review.role && review.company && ' at '}
+                                  {review.company || ''}
+                                </span>
+                                <span>•</span>
+                              </>
+                            )}
+                            <span className="flex-shrink-0">{format(new Date(review.created_date), 'MMM d, h:mm a')}</span>
+                          </div>
+                          <div className="flex items-center gap-2 mb-3">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${
+                                  i < review.rating
+                                    ? 'text-yellow-500 fill-yellow-500'
+                                    : 'text-gray-500'
+                                }`}
+                              />
+                            ))}
+                            <span className="text-sm text-gray-400 ml-1">({review.rating}/5)</span>
+                          </div>
+                          <p className="text-gray-300 leading-relaxed mb-3 break-words">
+                            "{review.content}"
+                          </p>
+                          <div className="flex items-center gap-2">
+                            {review.status !== 'approved' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 text-xs bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20"
+                                onClick={() => updateReviewStatusMutation.mutate({ id: review.id, status: 'approved' })}
+                              >
+                                <Check className="w-3 h-3 mr-1" />
+                                Approve
+                              </Button>
+                            )}
+                            {review.status !== 'rejected' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 text-xs bg-red-500/10 border-red-500/30 text-red-300 hover:bg-red-500/20"
+                                onClick={() => updateReviewStatusMutation.mutate({ id: review.id, status: 'rejected' })}
+                              >
+                                <X className="w-3 h-3 mr-1" />
+                                Reject
+                              </Button>
+                            )}
+                            {review.status === 'pending' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 text-xs bg-gray-500/10 border-gray-500/30 text-gray-300 hover:bg-gray-500/20"
+                                onClick={() => updateReviewStatusMutation.mutate({ id: review.id, status: 'pending' })}
+                              >
+                                Reset
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-9 w-9 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            onClick={() => deleteReviewMutation.mutate(review.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {/* Reviews Pagination */}
+                  {reviewsTotal > 0 && reviewsTotalPages > 0 && (
+                    <Pagination
+                      currentPage={reviewsPage}
+                      totalPages={reviewsTotalPages}
+                      onPageChange={setReviewsPage}
+                    />
+                  )}
+                </>
+              )}
+            </div>
           )}
         </div>
       </main>

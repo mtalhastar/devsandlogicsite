@@ -1,8 +1,11 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { SectionAnimation, StaggerContainer, StaggerItem } from '@/components/ui/animations';
 import { Star, Quote } from 'lucide-react';
+import ReviewForm from './ReviewForm';
 
-const testimonials = [
+// Fallback testimonials if no reviews are available
+const fallbackTestimonials = [
   {
     name: "Sarah Johnson",
     role: "CEO, TechVentures",
@@ -34,6 +37,30 @@ const testimonials = [
 ];
 
 export default function TestimonialsSection() {
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch('/api/reviews/get?status=approved');
+        const result = await response.json();
+        
+        if (response.ok && result.data && result.data.length > 0) {
+          setReviews(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
+
+  // Use approved reviews if available, otherwise use fallback
+  const testimonials = reviews.length > 0 ? reviews : fallbackTestimonials;
   return (
     <section className="py-24 bg-gradient-to-b from-black via-purple-950/20 to-black relative overflow-hidden">
       <div className="container mx-auto px-6 lg:px-12">
@@ -54,41 +81,64 @@ export default function TestimonialsSection() {
           </motion.div>
         </SectionAnimation>
 
-        <StaggerContainer className="grid md:grid-cols-2 gap-6">
-          {testimonials.map((testimonial, idx) => (
-            <StaggerItem key={idx} className="relative p-8 rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300">
-              {/* Quote icon */}
-              <Quote className="absolute top-6 right-6 w-10 h-10 text-purple-500/20" />
-              
-              {/* Stars */}
-              <div className="flex gap-1 mb-4">
-                {Array.from({ length: testimonial.rating }).map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                ))}
-              </div>
-
-              {/* Content */}
-              <p className="text-gray-300 leading-relaxed mb-6 text-lg">
-                "{testimonial.content}"
-              </p>
-
-              {/* Author */}
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden border border-purple-500/30">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name}
-                    className="w-full h-full object-cover"
-                  />
+        <StaggerContainer className="grid md:grid-cols-2 gap-6 mb-12">
+          {loading ? (
+            <div className="col-span-2 flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            testimonials.map((testimonial, idx) => (
+              <StaggerItem key={testimonial.id || idx} className="relative p-8 rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300">
+                {/* Quote icon */}
+                <Quote className="absolute top-6 right-6 w-10 h-10 text-purple-500/20" />
+                
+                {/* Stars */}
+                <div className="flex gap-1 mb-4">
+                  {Array.from({ length: testimonial.rating || 5 }).map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                  ))}
                 </div>
-                <div>
-                  <h4 className="text-white font-semibold">{testimonial.name}</h4>
-                  <p className="text-purple-400 text-sm">{testimonial.role}</p>
+
+                {/* Content */}
+                <p className="text-gray-300 leading-relaxed mb-6 text-lg">
+                  "{testimonial.content}"
+                </p>
+
+                {/* Author */}
+                <div className="flex items-center gap-4">
+                  {testimonial.imageUrl || testimonial.image ? (
+                    <div className="w-12 h-12 rounded-full overflow-hidden border border-purple-500/30">
+                      <img 
+                        src={testimonial.imageUrl || testimonial.image} 
+                        alt={testimonial.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-violet-600 flex items-center justify-center border border-purple-500/30">
+                      <span className="text-white font-bold text-lg">
+                        {testimonial.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="text-white font-semibold">{testimonial.name}</h4>
+                    <p className="text-purple-400 text-sm">
+                      {testimonial.role && testimonial.company 
+                        ? `${testimonial.role} at ${testimonial.company}`
+                        : testimonial.role || testimonial.company || ''}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </StaggerItem>
-          ))}
+              </StaggerItem>
+            ))
+          )}
         </StaggerContainer>
+
+        {/* Review Form */}
+        <div className="max-w-2xl mx-auto mt-12">
+          <ReviewForm />
+        </div>
       </div>
     </section>
   );
