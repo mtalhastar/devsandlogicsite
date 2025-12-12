@@ -29,6 +29,7 @@ export default async function handler(
     solutions,
     technologies,
     outcomes,
+    imageUrl,
     is_published,
   } = req.body;
 
@@ -64,6 +65,7 @@ export default async function handler(
     if (role !== undefined) updateData.role = role?.trim() || undefined;
     if (icon) updateData.icon = icon;
     if (gradient) updateData.gradient = gradient;
+    if (imageUrl !== undefined) updateData.imageUrl = imageUrl?.trim() || undefined;
 
     const caseStudy = await CaseStudy.findByIdAndUpdate(id, updateData, {
       new: true,

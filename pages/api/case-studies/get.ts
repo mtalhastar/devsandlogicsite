@@ -26,6 +26,17 @@ export default async function handler(
       .select('-__v')
       .lean();
 
+    // Debug logging
+    console.log('📊 Total case studies found in DB:', caseStudies.length);
+    caseStudies.forEach((study: any, index: number) => {
+      console.log(`Study ${index + 1}:`, {
+        id: study._id?.toString(),
+        title: study.title,
+        is_published: study.is_published,
+        platform: study.platform
+      });
+    });
+
     // Transform data to match dashboard format
     const transformedStudies = caseStudies.map((study: any) => ({
       id: study._id.toString(),
@@ -39,6 +50,7 @@ export default async function handler(
       solutions: study.solutions || [],
       technologies: study.technologies || [],
       outcomes: study.outcomes || [],
+      imageUrl: study.imageUrl || undefined,
       is_published: study.is_published !== false,
       created_date: study.createdAt,
     }));

@@ -54,11 +54,34 @@ npm run dev
 
 This project is built with:
 
-- Vite
+- Next.js
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
+- MongoDB
+- Cloudinary (for image uploads)
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+# MongoDB
+MONGODB_URI=your_mongodb_connection_string
+
+# Cloudinary (for image uploads)
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+```
+
+### Getting Cloudinary Credentials
+
+1. Sign up for a free account at [Cloudinary](https://cloudinary.com/)
+2. Go to your Dashboard
+3. Copy your Cloud Name, API Key, and API Secret
+4. Add them to your `.env.local` file
 
 ## How can I deploy this project?
 

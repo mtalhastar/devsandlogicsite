@@ -28,6 +28,7 @@ export default async function handler(
     solutions,
     technologies,
     outcomes,
+    imageUrl,
     is_published,
   } = req.body;
 
@@ -53,6 +54,7 @@ export default async function handler(
       solutions: solutions || [],
       technologies: technologies || [],
       outcomes: outcomes || [],
+      imageUrl: imageUrl?.trim() || undefined,
       is_published: is_published !== false,
     });
 

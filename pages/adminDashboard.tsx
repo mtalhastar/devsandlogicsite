@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   Plus, 
   Mail, 
@@ -27,7 +28,10 @@ import {
   Inbox,
   Sparkles,
   Menu,
-  X as XIcon
+  X as XIcon,
+  Database,
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -39,6 +43,103 @@ const gradientOptions = [
   { value: "from-orange-500 to-amber-500", label: "Orange/Amber" },
   { value: "from-violet-500 to-purple-500", label: "Violet/Purple" }
 ];
+
+// Platform options
+const platformOptions = [
+  "AWS", "Azure", "GCP", "Cloud", "Full Stack", "Frontend", "Backend", 
+  "Mobile", "AI", "FinTech", "Healthcare", "E-Commerce", "SaaS", 
+  "Platform", "Logistics", "DevOps", "Web", "Other"
+];
+
+// Role options
+const roleOptions = [
+  "Lead Cloud Architect & DevOps Engineer",
+  "Cloud Security Architect",
+  "Senior DevOps Engineer",
+  "Platform Engineer",
+  "Big Data Cloud Architect",
+  "Senior Cloud Architect",
+  "Cloud Data Architect",
+  "Cloud Migration Architect",
+  "DevOps Architect",
+  "FinOps Engineer",
+  "Full Stack Developer",
+  "AI Engineer",
+  "Backend Developer",
+  "Frontend Developer",
+  "Mobile Developer",
+  "Software Engineer",
+  "Solutions Architect",
+  "Other"
+];
+
+// Technology category options
+const technologyCategoryOptions = [
+  "Cloud Platform",
+  "Frontend",
+  "Backend",
+  "Database",
+  "DevOps",
+  "Container",
+  "Monitoring",
+  "Security",
+  "CI/CD",
+  "Infrastructure",
+  "AI/ML",
+  "Mobile",
+  "Other"
+];
+
+// Technology value options by category
+const technologyValueOptions: Record<string, string[]> = {
+  "Cloud Platform": [
+    "AWS", "Azure", "GCP", "DigitalOcean", "Vercel", "Netlify", "Heroku"
+  ],
+  "Frontend": [
+    "React", "Next.js", "Vue.js", "Angular", "TypeScript", "JavaScript",
+    "Tailwind CSS", "shadcn/ui", "Framer Motion", "HTML5", "CSS3"
+  ],
+  "Backend": [
+    "Node.js", "Express", "Python", "Django", "Flask", "FastAPI",
+    "Java", "Spring Boot", "Go", "Rust", "PHP", "Ruby on Rails"
+  ],
+  "Database": [
+    "MongoDB", "PostgreSQL", "MySQL", "Redis", "DynamoDB", "Firebase",
+    "Supabase", "Elasticsearch", "OpenSearch", "InfluxDB"
+  ],
+  "DevOps": [
+    "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "GitHub Actions",
+    "GitLab CI", "CircleCI", "ArgoCD", "Helm", "Istio"
+  ],
+  "Container": [
+    "Docker", "Kubernetes", "EKS", "AKS", "GKE", "ECS", "Fargate",
+    "Podman", "Containerd"
+  ],
+  "Monitoring": [
+    "Prometheus", "Grafana", "Datadog", "New Relic", "Sentry", "CloudWatch",
+    "Azure Monitor", "Stackdriver", "ELK Stack"
+  ],
+  "Security": [
+    "AWS IAM", "Azure AD", "OAuth", "JWT", "mTLS", "WAF", "Cloudflare",
+    "Vault", "Key Vault", "OPA"
+  ],
+  "CI/CD": [
+    "GitHub Actions", "GitLab CI", "Jenkins", "CircleCI", "Travis CI",
+    "Azure DevOps", "Bamboo", "TeamCity"
+  ],
+  "Infrastructure": [
+    "Terraform", "CloudFormation", "Pulumi", "Ansible", "Chef", "Puppet",
+    "Vagrant", "Packer"
+  ],
+  "AI/ML": [
+    "OpenAI", "GPT-4", "LangChain", "TensorFlow", "PyTorch", "Scikit-learn",
+    "Pinecone", "Hugging Face", "Claude"
+  ],
+  "Mobile": [
+    "React Native", "Flutter", "Swift", "Kotlin", "Ionic", "Xamarin"
+  ],
+  "Other": []
+};
 
 type CaseStudy = {
   id: string;
@@ -52,6 +153,7 @@ type CaseStudy = {
   solutions: Array<{ title: string; description: string }>;
   technologies: Array<{ category: string; value: string }>;
   outcomes: string[];
+  imageUrl?: string;
   is_published: boolean;
   created_date?: string;
 };
@@ -61,6 +163,7 @@ export default function AdminDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [editingStudy, setEditingStudy] = useState<CaseStudy | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     short_description: '',
@@ -72,8 +175,10 @@ export default function AdminDashboard() {
     solutions: [{ title: '', description: '' }],
     technologies: [{ category: '', value: '' }],
     outcomes: [''],
+    imageUrl: '',
     is_published: true
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -189,8 +294,10 @@ export default function AdminDashboard() {
       solutions: [{ title: '', description: '' }],
       technologies: [{ category: '', value: '' }],
       outcomes: [''],
+      imageUrl: '',
       is_published: true
     });
+    setUploadingImage(false);
   };
 
   const handleEditStudy = (study: CaseStudy) => {
@@ -206,9 +313,52 @@ export default function AdminDashboard() {
       solutions: study.solutions?.length > 0 ? study.solutions : [{ title: '', description: '' }],
       technologies: study.technologies?.length > 0 ? study.technologies : [{ category: '', value: '' }],
       outcomes: study.outcomes?.length > 0 ? study.outcomes : [''],
+      imageUrl: study.imageUrl || '',
       is_published: study.is_published !== false
     });
     setShowForm(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Image size must be less than 10MB');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', file);
+
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to upload image');
+      }
+
+      setFormData({ ...formData, imageUrl: result.url });
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      alert(`Error uploading image: ${error.message}`);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -465,7 +615,7 @@ export default function AdminDashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className={`group p-5 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:shadow-lg ${
+                    className={`group p-5 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:shadow-lg overflow-hidden ${
                       msg.is_read 
                         ? 'bg-white/[0.02] border-white/5 hover:border-white/10' 
                         : 'bg-purple-500/5 border-purple-500/20 hover:border-purple-500/40 shadow-lg shadow-purple-500/5'
@@ -477,7 +627,7 @@ export default function AdminDashboard() {
                       }`}>
                         {msg.name.charAt(0).toUpperCase()}
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 overflow-hidden">
                         <div className="flex items-center gap-3 mb-1 flex-wrap">
                           <span className="font-semibold text-white">{msg.name}</span>
                           {!msg.is_read && (
@@ -504,7 +654,41 @@ export default function AdminDashboard() {
                           <span>•</span>
                           <span className="flex-shrink-0">{format(new Date(msg.created_date), 'MMM d, h:mm a')}</span>
                         </div>
-                        <p className="text-gray-300 leading-relaxed mb-3">{msg.message}</p>
+                        <div className="mb-3 break-words">
+                          {(() => {
+                            const words = msg.message.split(' ');
+                            const wordLimit = 20;
+                            const isLong = words.length > wordLimit;
+                            const truncatedText = isLong ? words.slice(0, wordLimit).join(' ') + '...' : msg.message;
+                            const isExpanded = expandedMessageId === msg.id;
+                            
+                            return (
+                              <>
+                                <p 
+                                  className="text-gray-300 leading-relaxed break-words overflow-wrap-anywhere"
+                                  style={{
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    maxWidth: '100%'
+                                  }}
+                                >
+                                  {isExpanded ? msg.message : truncatedText}
+                                </p>
+                                {isLong && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedMessageId(isExpanded ? null : msg.id);
+                                    }}
+                                    className="text-xs text-purple-400 hover:text-purple-300 mt-1 transition-colors font-medium"
+                                  >
+                                    {isExpanded ? 'Show less' : 'Show more'}
+                                  </button>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
                         <div className="flex items-center gap-2">
                           <Select
                             value={msg.status || 'Received'}
@@ -564,17 +748,69 @@ export default function AdminDashboard() {
                       </div>
                       <h3 className="text-lg font-semibold text-white mb-2">No case studies yet</h3>
                       <p className="text-gray-500 mb-6">Create your first case study to showcase your work</p>
-                      <Button 
-                        onClick={() => setShowForm(true)}
-                        className="bg-gradient-to-r from-purple-600 to-violet-600"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create Case Study
-                      </Button>
+                      <div className="flex gap-4 justify-center">
+                        <Button 
+                          onClick={() => setShowForm(true)}
+                          className="bg-gradient-to-r from-purple-600 to-violet-600"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Case Study
+                        </Button>
+                        <Button
+                          onClick={async () => {
+                            if (confirm('This will add all case studies from the static data file to the database. Continue?')) {
+                              try {
+                                const res = await fetch('/api/case-studies/seed', { method: 'POST' });
+                                const result = await res.json();
+                                if (res.ok) {
+                                  alert(`Success! ${result.added} case studies added, ${result.skipped} skipped.`);
+                                  queryClient.invalidateQueries({ queryKey: ['caseStudies'] });
+                                } else {
+                                  alert(`Error: ${result.message}`);
+                                }
+                              } catch (error: any) {
+                                alert(`Error: ${error.message}`);
+                              }
+                            }
+                          }}
+                          variant="outline"
+                          className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
+                        >
+                          <Database className="w-4 h-4 mr-2" />
+                          Seed from Static Data
+                        </Button>
+                      </div>
                     </div>
                   ) : (
-                    <div className="grid gap-4">
-                      {caseStudies.map((study, idx) => (
+                    <>
+                      {/* Seed Database Button */}
+                      <div className="mb-4 flex justify-end">
+                        <Button
+                          onClick={async () => {
+                            if (confirm('This will add all case studies from the static data file to the database. Continue?')) {
+                              try {
+                                const res = await fetch('/api/case-studies/seed', { method: 'POST' });
+                                const result = await res.json();
+                                if (res.ok) {
+                                  alert(`Success! ${result.added} case studies added, ${result.skipped} skipped.`);
+                                  queryClient.invalidateQueries({ queryKey: ['caseStudies'] });
+                                } else {
+                                  alert(`Error: ${result.message}`);
+                                }
+                              } catch (error: any) {
+                                alert(`Error: ${error.message}`);
+                              }
+                            }
+                          }}
+                          variant="outline"
+                          className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
+                        >
+                          <Database className="w-4 h-4 mr-2" />
+                          Seed Database from Static Data
+                        </Button>
+                      </div>
+                      <div className="grid gap-4">
+                        {caseStudies.map((study, idx) => (
                         <motion.div
                           key={study.id}
                           initial={{ opacity: 0, y: 20 }}
@@ -629,7 +865,8 @@ export default function AdminDashboard() {
                           </div>
                         </motion.div>
                       ))}
-                    </div>
+                      </div>
+                    </>
                   )}
                 </div>
               ) : (
@@ -646,6 +883,8 @@ export default function AdminDashboard() {
                   removeTechnology={removeTechnology}
                   addOutcome={addOutcome}
                   removeOutcome={removeOutcome}
+                  onImageUpload={handleImageUpload}
+                  uploadingImage={uploadingImage}
                 />
               )}
             </>
@@ -668,7 +907,9 @@ function CaseStudyForm({
   addTechnology,
   removeTechnology,
   addOutcome,
-  removeOutcome
+  removeOutcome,
+  onImageUpload,
+  uploadingImage
 }) {
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -695,13 +936,21 @@ function CaseStudyForm({
             </div>
             <div>
               <label className="text-sm text-gray-400 mb-2 block">Platform *</label>
-              <Input
-                value={formData.platform}
-                onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
-                className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 focus:ring-purple-500/20"
-                placeholder="AWS, Azure, GCP..."
-                required
-              />
+              <Select 
+                value={formData.platform} 
+                onValueChange={(v) => setFormData({ ...formData, platform: v })}
+              >
+                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10">
+                  <SelectValue placeholder="Select platform" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#12121a] border-white/10">
+                  {platformOptions.map((platform) => (
+                    <SelectItem key={platform} value={platform} className="text-white focus:bg-white/10 focus:text-white">
+                      {platform}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -716,24 +965,95 @@ function CaseStudyForm({
             />
           </div>
 
+          {/* Image Upload */}
+          <div>
+            <label className="text-sm text-gray-400 mb-2 block">Case Study Image</label>
+            <div className="space-y-3">
+              {formData.imageUrl && (
+                <div className="relative group">
+                  <img 
+                    src={formData.imageUrl} 
+                    alt="Case study preview" 
+                    className="w-full h-48 object-cover rounded-lg border border-white/10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                    className="absolute top-2 right-2 bg-red-500/80 hover:bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <label className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={onImageUpload}
+                    className="hidden"
+                    disabled={uploadingImage}
+                  />
+                  <div className="flex items-center justify-center gap-2 px-4 py-3 border border-dashed border-white/20 rounded-lg cursor-pointer hover:border-purple-500/50 transition-colors bg-white/5">
+                    {uploadingImage ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm text-gray-400">Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 text-purple-400" />
+                        <span className="text-sm text-gray-400">
+                          {formData.imageUrl ? 'Change Image' : 'Upload Image'}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </label>
+                {formData.imageUrl && (
+                  <Input
+                    type="text"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    placeholder="Or paste image URL"
+                    className="flex-1 bg-white/5 border-white/10 text-white focus:border-purple-500/50 focus:ring-purple-500/20"
+                  />
+                )}
+              </div>
+              <p className="text-xs text-gray-500">Upload an image or paste a URL. Max size: 10MB</p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm text-gray-400 mb-2 block">Role</label>
-              <Input
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 focus:ring-purple-500/20"
-              />
+              <Select 
+                value={formData.role} 
+                onValueChange={(v) => setFormData({ ...formData, role: v })}
+              >
+                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#12121a] border-white/10">
+                  {roleOptions.map((role) => (
+                    <SelectItem key={role} value={role} className="text-white focus:bg-white/10 focus:text-white">
+                      {role}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="text-sm text-gray-400 mb-2 block">Icon</label>
               <Select value={formData.icon} onValueChange={(v) => setFormData({ ...formData, icon: v })}>
-                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50">
+                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#12121a] border-white/10">
                   {iconOptions.map(icon => (
-                    <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                    <SelectItem key={icon} value={icon} className="text-white focus:bg-white/10 focus:text-white">{icon}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -741,12 +1061,12 @@ function CaseStudyForm({
             <div>
               <label className="text-sm text-gray-400 mb-2 block">Color Theme</label>
               <Select value={formData.gradient} onValueChange={(v) => setFormData({ ...formData, gradient: v })}>
-                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50">
+                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#12121a] border-white/10">
                   {gradientOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    <SelectItem key={opt.value} value={opt.value} className="text-white focus:bg-white/10 focus:text-white">{opt.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -812,33 +1132,97 @@ function CaseStudyForm({
               </Button>
             </div>
             <div className="space-y-3">
-              {formData.technologies.map((tech, idx) => (
-                <div key={idx} className="flex gap-2">
-                  <Input
-                    placeholder="Category (e.g., Cloud)"
-                    value={tech.category}
-                    onChange={(e) => {
-                      const newTechs = [...formData.technologies];
-                      newTechs[idx].category = e.target.value;
-                      setFormData({ ...formData, technologies: newTechs });
-                    }}
-                    className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 w-1/3"
-                  />
-                  <Input
-                    placeholder="Value (e.g., AWS, EKS, Lambda)"
-                    value={tech.value}
-                    onChange={(e) => {
-                      const newTechs = [...formData.technologies];
-                      newTechs[idx].value = e.target.value;
-                      setFormData({ ...formData, technologies: newTechs });
-                    }}
-                    className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 flex-1"
-                  />
-                  <Button type="button" size="icon" variant="ghost" className="text-red-400" onClick={() => removeTechnology(idx)}>
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
+              {formData.technologies.map((tech, idx) => {
+                const categoryOptions = tech.category ? technologyValueOptions[tech.category] || [] : [];
+                const isUsingCustomInput = tech.value === "__custom__" || tech.category === "Other";
+                const showCustomInput = isUsingCustomInput || (tech.value && !categoryOptions.includes(tech.value) && tech.value !== "");
+                
+                return (
+                  <div key={idx} className="flex gap-2">
+                    <Select
+                      value={tech.category}
+                      onValueChange={(v) => {
+                        const newTechs = [...formData.technologies];
+                        newTechs[idx].category = v;
+                        // Reset value when category changes
+                        newTechs[idx].value = '';
+                        setFormData({ ...formData, technologies: newTechs });
+                      }}
+                    >
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10 w-1/3">
+                        <SelectValue placeholder="Category" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#12121a] border-white/10">
+                        {technologyCategoryOptions.map((category) => (
+                          <SelectItem key={category} value={category} className="text-white focus:bg-white/10 focus:text-white">
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {showCustomInput ? (
+                      <Input
+                        placeholder="Enter technology name"
+                        value={tech.value === "__custom__" ? "" : tech.value}
+                        onChange={(e) => {
+                          const newTechs = [...formData.technologies];
+                          newTechs[idx].value = e.target.value;
+                          setFormData({ ...formData, technologies: newTechs });
+                        }}
+                        className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 flex-1"
+                      />
+                    ) : (
+                      <Select
+                        value={tech.value}
+                        onValueChange={(v) => {
+                          const newTechs = [...formData.technologies];
+                          if (v === "__custom__") {
+                            newTechs[idx].value = "__custom__";
+                          } else {
+                            newTechs[idx].value = v;
+                          }
+                          setFormData({ ...formData, technologies: newTechs });
+                        }}
+                        disabled={!tech.category}
+                      >
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10 flex-1">
+                          <SelectValue placeholder={tech.category ? "Select technology" : "Select category first"} />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#12121a] border-white/10">
+                          {tech.category && categoryOptions.length > 0 && (
+                            <>
+                              {categoryOptions.map((value) => (
+                                <SelectItem key={value} value={value} className="text-white focus:bg-white/10 focus:text-white">
+                                  {value}
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="__custom__" className="text-purple-400 focus:bg-purple-500/20 focus:text-purple-300">+ Custom value</SelectItem>
+                            </>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {showCustomInput && tech.category !== "Other" && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="text-purple-400"
+                        onClick={() => {
+                          const newTechs = [...formData.technologies];
+                          newTechs[idx].value = '';
+                          setFormData({ ...formData, technologies: newTechs });
+                        }}
+                      >
+                        Use dropdown
+                      </Button>
+                    )}
+                    <Button type="button" size="icon" variant="ghost" className="text-red-400" onClick={() => removeTechnology(idx)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

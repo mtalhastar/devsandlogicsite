@@ -11,6 +11,7 @@ export interface ICaseStudy extends Document {
   solutions: Array<{ title: string; description: string }>;
   technologies: Array<{ category: string; value: string }>;
   outcomes: string[];
+  imageUrl?: string;
   is_published: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -81,6 +82,10 @@ const CaseStudySchema: Schema = new Schema(
       type: String,
       trim: true,
     }],
+    imageUrl: {
+      type: String,
+      trim: true,
+    },
     is_published: {
       type: Boolean,
       default: true,
