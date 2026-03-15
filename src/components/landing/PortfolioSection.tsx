@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronDown,
@@ -15,61 +15,109 @@ import {
   Lock,
   Brain,
   Globe,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { caseStudies } from '@/data/caseStudies';
 
-// Map domain to icon
-const domainIcons: Record<string, any> = {
-  'Cloud Engineering': Cloud,
-  'Full Stack Development': Code,
-  'Artificial Intelligence': Brain,
+// Map platform to icon (using platform field from DB)
+const platformIcons: Record<string, any> = {
+  'AWS': Cloud,
+  'Azure': Cloud,
+  'GCP': Cloud,
+  'Cloud': Cloud,
+  'Web': Code,
+  'Frontend': Code,
+  'Backend': Server,
+  'Full Stack': Code,
+  'Mobile': Globe,
+  'AI': Brain,
   'FinTech': Shield,
   'Healthcare': Shield,
   'E-Commerce': ShoppingCart,
-  'SaaS / Platform Engineering': Server,
+  'SaaS': Server,
+  'Platform': Server,
   'Logistics': Truck,
 };
 
-// Map domain to gradient
-const domainGradients: Record<string, string> = {
-  'Cloud Engineering': 'from-blue-500 to-cyan-500',
-  'Full Stack Development': 'from-purple-500 to-pink-500',
-  'Artificial Intelligence': 'from-emerald-500 to-teal-500',
+// Map platform to gradient
+const platformGradients: Record<string, string> = {
+  'AWS': 'from-blue-500 to-cyan-500',
+  'Azure': 'from-blue-500 to-cyan-500',
+  'GCP': 'from-blue-500 to-cyan-500',
+  'Cloud': 'from-blue-500 to-cyan-500',
+  'Web': 'from-purple-500 to-pink-500',
+  'Frontend': 'from-purple-500 to-pink-500',
+  'Backend': 'from-violet-500 to-purple-500',
+  'Full Stack': 'from-purple-500 to-pink-500',
+  'Mobile': 'from-cyan-500 to-blue-500',
+  'AI': 'from-emerald-500 to-teal-500',
   'FinTech': 'from-blue-500 to-indigo-500',
   'Healthcare': 'from-green-500 to-emerald-500',
   'E-Commerce': 'from-orange-500 to-red-500',
-  'SaaS / Platform Engineering': 'from-violet-500 to-purple-500',
+  'SaaS': 'from-violet-500 to-purple-500',
+  'Platform': 'from-violet-500 to-purple-500',
   'Logistics': 'from-cyan-500 to-blue-500',
 };
 
-// Transform case studies to match component format
-const projects = caseStudies.map((study, index) => {
-  const Icon = domainIcons[study.domain] || Code;
-  const gradient = domainGradients[study.domain] || 'from-purple-500 to-violet-500';
+// Helper to get icon from platform
+const getIconFromPlatform = (platform: string): any => {
+  const platformLower = platform?.toLowerCase() || '';
+  for (const [key, icon] of Object.entries(platformIcons)) {
+    if (platformLower.includes(key.toLowerCase())) {
+      return icon;
+    }
+  }
+  return Code;
+};
+
+// Helper to get gradient from platform
+const getGradientFromPlatform = (platform: string): string => {
+  const platformLower = platform?.toLowerCase() || '';
+  for (const [key, gradient] of Object.entries(platformGradients)) {
+    if (platformLower.includes(key.toLowerCase())) {
+      return gradient;
+    }
+  }
+  return 'from-purple-500 to-violet-500';
+};
+
+// Transform database case study to component format
+const transformCaseStudy = (study: any) => {
+  const Icon = getIconFromPlatform(study.platform);
+  const gradient = study.gradient || getGradientFromPlatform(study.platform);
+  
+  // Extract technologies
+  const techList = Array.isArray(study.technologies) 
+    ? study.technologies.map((t: any) => typeof t === 'object' ? t.value : t).filter(Boolean)
+    : [];
+  
+  // Use platform as domain for filtering
+  const domain = study.platform || 'Other';
   
   return {
     id: study.id,
     title: study.title,
-    shortDesc: study.objective,
+    shortDesc: study.short_description,
     icon: Icon,
-    platform: study.keyTechnologies.slice(0, 3).join(', '),
-    role: study.role,
+    platform: techList.slice(0, 3).join(', ') || study.platform,
+    role: study.role || '',
     challenge: study.challenge,
-    solution: study.solution.map((sol, idx) => ({
-      title: `Solution ${idx + 1}`,
-      desc: sol
-    })),
+    solution: Array.isArray(study.solutions) 
+      ? study.solutions.map((sol: any, idx: number) => ({
+          title: typeof sol === 'object' ? sol.title || `Solution ${idx + 1}` : `Solution ${idx + 1}`,
+          desc: typeof sol === 'object' ? sol.description : String(sol)
+        }))
+      : [],
     technologies: {
-      'Technologies': study.keyTechnologies.join(', ')
+      'Technologies': techList.join(', ') || study.platform
     },
-    outcomes: study.businessOutcome,
+    outcomes: Array.isArray(study.outcomes) ? study.outcomes : [],
     gradient: gradient,
-    domain: study.domain,
-    image: study.image
+    domain: domain,
+    image: study.imageUrl || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80'
   };
-});
+};
 
 function ProjectCard({ project, isExpanded, onToggle }) {
   const Icon = project.icon;
@@ -77,36 +125,47 @@ function ProjectCard({ project, isExpanded, onToggle }) {
   return (
     <motion.div
       layout
-      className="rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300 overflow-hidden"
+      className="group rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300 overflow-hidden"
     >
-      {/* Header - Always visible */}
-      <div
-        className="p-6 cursor-pointer"
-        onClick={onToggle}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4 flex-1">
-            <div className={`flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br ${project.gradient} flex items-center justify-center`}>
-              <Icon className="w-7 h-7 text-white" />
+      {/* Header with Image - Always visible */}
+      <div className="cursor-pointer" onClick={onToggle}>
+        {/* Image Section */}
+        {project.image && (
+          <div className="relative h-64 overflow-hidden">
+            <img 
+              src={project.image} 
+              alt={project.title}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+            
+            {/* Floating Icon */}
+            <div className={`absolute top-4 right-4 w-12 h-12 rounded-xl bg-gradient-to-br ${project.gradient} flex items-center justify-center shadow-lg`}>
+              <Icon className="w-6 h-6 text-white" />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2 flex-wrap">
-                {project.domain && (
-                  <span className="px-3 py-1 text-xs font-medium text-blue-300 bg-blue-500/20 rounded-full border border-blue-500/30">
-                    {project.domain}
-                  </span>
-                )}
-                <span className="px-3 py-1 text-xs font-medium text-purple-300 bg-purple-500/20 rounded-full border border-purple-500/30">
-                  {project.platform}
-                </span>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">{project.title}</h3>
-              <p className="text-gray-400 text-sm">{project.shortDesc}</p>
+            
+            {/* Platform Badge */}
+            <div className="absolute top-4 left-4">
+              <span className="px-3 py-1.5 text-xs font-medium text-white bg-black/40 backdrop-blur-md rounded-full border border-white/20">
+                {project.platform}
+              </span>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="text-purple-400 hover:text-purple-300 flex-shrink-0">
-            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-          </Button>
+        )}
+        
+        {/* Content Section */}
+        <div className="p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
+                {project.title}
+              </h3>
+              <p className="text-gray-400 text-sm leading-relaxed">{project.shortDesc}</p>
+            </div>
+            <Button variant="ghost" size="icon" className="text-purple-400 hover:text-purple-300 flex-shrink-0">
+              {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -200,6 +259,41 @@ export default function PortfolioSection() {
   const [expandedId, setExpandedId] = useState(null);
   const [activeFilter, setActiveFilter] = useState<string>('All');
   const [displayLimit, setDisplayLimit] = useState<number>(5);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch case studies from database
+  useEffect(() => {
+    const fetchCaseStudies = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch('/api/case-studies/get');
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to fetch case studies');
+        }
+
+        // Filter only published case studies and transform
+        const publishedStudies = (result.data || []).filter((study: any) => study.is_published !== false);
+        const transformedProjects = publishedStudies.map(transformCaseStudy);
+
+        setProjects(transformedProjects);
+        setError(null);
+      } catch (err: any) {
+        console.error('Error fetching case studies:', err);
+        setError(err.message || 'Failed to load projects');
+        setProjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCaseStudies();
+  }, []);
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
@@ -280,16 +374,28 @@ export default function PortfolioSection() {
         </motion.div>
 
         {/* Projects List */}
-        {filteredProjects.length > 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+            <span className="ml-4 text-gray-400">Loading projects...</span>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-400 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()} variant="outline" className="text-white border-purple-600">
+              Try Again
+            </Button>
+          </div>
+        ) : filteredProjects.length > 0 ? (
           <>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {displayedProjects.map((project, idx) => (
                 <motion.div
                   key={project.id}
                   initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.05 }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
                 >
                   <ProjectCard
                     project={project}

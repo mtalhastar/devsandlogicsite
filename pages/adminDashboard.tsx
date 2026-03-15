@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { 
   Plus, 
   Mail, 
@@ -27,7 +28,13 @@ import {
   Inbox,
   Sparkles,
   Menu,
-  X as XIcon
+  X as XIcon,
+  Database,
+  Upload,
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  Star
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -39,6 +46,103 @@ const gradientOptions = [
   { value: "from-orange-500 to-amber-500", label: "Orange/Amber" },
   { value: "from-violet-500 to-purple-500", label: "Violet/Purple" }
 ];
+
+// Platform options
+const platformOptions = [
+  "AWS", "Azure", "GCP", "Cloud", "Full Stack", "Frontend", "Backend", 
+  "Mobile", "AI", "FinTech", "Healthcare", "E-Commerce", "SaaS", 
+  "Platform", "Logistics", "DevOps", "Web", "Other"
+];
+
+// Role options
+const roleOptions = [
+  "Lead Cloud Architect & DevOps Engineer",
+  "Cloud Security Architect",
+  "Senior DevOps Engineer",
+  "Platform Engineer",
+  "Big Data Cloud Architect",
+  "Senior Cloud Architect",
+  "Cloud Data Architect",
+  "Cloud Migration Architect",
+  "DevOps Architect",
+  "FinOps Engineer",
+  "Full Stack Developer",
+  "AI Engineer",
+  "Backend Developer",
+  "Frontend Developer",
+  "Mobile Developer",
+  "Software Engineer",
+  "Solutions Architect",
+  "Other"
+];
+
+// Technology category options
+const technologyCategoryOptions = [
+  "Cloud Platform",
+  "Frontend",
+  "Backend",
+  "Database",
+  "DevOps",
+  "Container",
+  "Monitoring",
+  "Security",
+  "CI/CD",
+  "Infrastructure",
+  "AI/ML",
+  "Mobile",
+  "Other"
+];
+
+// Technology value options by category
+const technologyValueOptions: Record<string, string[]> = {
+  "Cloud Platform": [
+    "AWS", "Azure", "GCP", "DigitalOcean", "Vercel", "Netlify", "Heroku"
+  ],
+  "Frontend": [
+    "React", "Next.js", "Vue.js", "Angular", "TypeScript", "JavaScript",
+    "Tailwind CSS", "shadcn/ui", "Framer Motion", "HTML5", "CSS3"
+  ],
+  "Backend": [
+    "Node.js", "Express", "Python", "Django", "Flask", "FastAPI",
+    "Java", "Spring Boot", "Go", "Rust", "PHP", "Ruby on Rails"
+  ],
+  "Database": [
+    "MongoDB", "PostgreSQL", "MySQL", "Redis", "DynamoDB", "Firebase",
+    "Supabase", "Elasticsearch", "OpenSearch", "InfluxDB"
+  ],
+  "DevOps": [
+    "Docker", "Kubernetes", "Terraform", "Ansible", "Jenkins", "GitHub Actions",
+    "GitLab CI", "CircleCI", "ArgoCD", "Helm", "Istio"
+  ],
+  "Container": [
+    "Docker", "Kubernetes", "EKS", "AKS", "GKE", "ECS", "Fargate",
+    "Podman", "Containerd"
+  ],
+  "Monitoring": [
+    "Prometheus", "Grafana", "Datadog", "New Relic", "Sentry", "CloudWatch",
+    "Azure Monitor", "Stackdriver", "ELK Stack"
+  ],
+  "Security": [
+    "AWS IAM", "Azure AD", "OAuth", "JWT", "mTLS", "WAF", "Cloudflare",
+    "Vault", "Key Vault", "OPA"
+  ],
+  "CI/CD": [
+    "GitHub Actions", "GitLab CI", "Jenkins", "CircleCI", "Travis CI",
+    "Azure DevOps", "Bamboo", "TeamCity"
+  ],
+  "Infrastructure": [
+    "Terraform", "CloudFormation", "Pulumi", "Ansible", "Chef", "Puppet",
+    "Vagrant", "Packer"
+  ],
+  "AI/ML": [
+    "OpenAI", "GPT-4", "LangChain", "TensorFlow", "PyTorch", "Scikit-learn",
+    "Pinecone", "Hugging Face", "Claude"
+  ],
+  "Mobile": [
+    "React Native", "Flutter", "Swift", "Kotlin", "Ionic", "Xamarin"
+  ],
+  "Other": []
+};
 
 type CaseStudy = {
   id: string;
@@ -52,6 +156,7 @@ type CaseStudy = {
   solutions: Array<{ title: string; description: string }>;
   technologies: Array<{ category: string; value: string }>;
   outcomes: string[];
+  imageUrl?: string;
   is_published: boolean;
   created_date?: string;
 };
@@ -61,6 +166,11 @@ export default function AdminDashboard() {
   const [showForm, setShowForm] = useState(false);
   const [editingStudy, setEditingStudy] = useState<CaseStudy | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedMessageId, setExpandedMessageId] = useState<string | null>(null);
+  const [messagesPage, setMessagesPage] = useState(1);
+  const [caseStudiesPage, setCaseStudiesPage] = useState(1);
+  const [reviewsPage, setReviewsPage] = useState(1);
+  const itemsPerPage = 5;
   const [formData, setFormData] = useState({
     title: '',
     short_description: '',
@@ -72,29 +182,52 @@ export default function AdminDashboard() {
     solutions: [{ title: '', description: '' }],
     technologies: [{ category: '', value: '' }],
     outcomes: [''],
+    imageUrl: '',
     is_published: true
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const queryClient = useQueryClient();
 
-  // Fetch data
-  const { data: messages = [], isLoading: loadingMessages } = useQuery({
-    queryKey: ['contactMessages'],
+  // Fetch data with pagination
+  const { data: messagesData, isLoading: loadingMessages } = useQuery({
+    queryKey: ['contactMessages', messagesPage],
     queryFn: async () => {
-      const res = await fetch('/api/contacts/get');
+      const res = await fetch(`/api/contacts/get?page=${messagesPage}&limit=${itemsPerPage}`);
       const json = await res.json();
-      return json.data || [];
+      return { data: json.data || [], count: json.count || 0 };
     }
   });
 
-  const { data: caseStudies = [], isLoading: loadingStudies } = useQuery({
-    queryKey: ['caseStudies'],
+  const messages = messagesData?.data || [];
+  const messagesTotal = messagesData?.count || 0;
+  const messagesTotalPages = Math.ceil(messagesTotal / itemsPerPage);
+
+  const { data: caseStudiesData, isLoading: loadingStudies } = useQuery({
+    queryKey: ['caseStudies', caseStudiesPage],
     queryFn: async () => {
-      const res = await fetch('/api/case-studies/get');
+      const res = await fetch(`/api/case-studies/get?page=${caseStudiesPage}&limit=${itemsPerPage}`);
       const json = await res.json();
-      return json.data || [];
+      return { data: json.data || [], count: json.count || 0 };
     }
   });
+
+  const caseStudies = caseStudiesData?.data || [];
+  const caseStudiesTotal = caseStudiesData?.count || 0;
+  const caseStudiesTotalPages = Math.ceil(caseStudiesTotal / itemsPerPage);
+
+  const { data: reviewsData, isLoading: loadingReviews } = useQuery({
+    queryKey: ['reviews', reviewsPage],
+    queryFn: async () => {
+      const res = await fetch(`/api/reviews/get?page=${reviewsPage}&limit=${itemsPerPage}`);
+      const json = await res.json();
+      return { data: json.data || [], count: json.count || 0 };
+    }
+  });
+
+  const reviews = reviewsData?.data || [];
+  const reviewsTotal = reviewsData?.count || 0;
+  const reviewsTotalPages = Math.ceil(reviewsTotal / itemsPerPage);
 
   // Mutations
   const createStudyMutation = useMutation({
@@ -175,6 +308,30 @@ export default function AdminDashboard() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['contactMessages'] })
   });
 
+  const updateReviewStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const res = await fetch(`/api/reviews/update-status?id=${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error('Failed to update review status');
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['reviews'] })
+  });
+
+  const deleteReviewMutation = useMutation({
+    mutationFn: async (id) => {
+      const res = await fetch(`/api/reviews/delete?id=${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to delete review');
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['reviews'] })
+  });
+
   const resetForm = () => {
     setShowForm(false);
     setEditingStudy(null);
@@ -189,8 +346,10 @@ export default function AdminDashboard() {
       solutions: [{ title: '', description: '' }],
       technologies: [{ category: '', value: '' }],
       outcomes: [''],
+      imageUrl: '',
       is_published: true
     });
+    setUploadingImage(false);
   };
 
   const handleEditStudy = (study: CaseStudy) => {
@@ -206,9 +365,52 @@ export default function AdminDashboard() {
       solutions: study.solutions?.length > 0 ? study.solutions : [{ title: '', description: '' }],
       technologies: study.technologies?.length > 0 ? study.technologies : [{ category: '', value: '' }],
       outcomes: study.outcomes?.length > 0 ? study.outcomes : [''],
+      imageUrl: study.imageUrl || '',
       is_published: study.is_published !== false
     });
     setShowForm(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Image size must be less than 10MB');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', file);
+
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to upload image');
+      }
+
+      setFormData({ ...formData, imageUrl: result.url });
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      alert(`Error uploading image: ${error.message}`);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -282,6 +484,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 setActiveTab('messages');
                 setSidebarOpen(false);
+                setMessagesPage(1);
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 activeTab === 'messages' 
@@ -301,6 +504,7 @@ export default function AdminDashboard() {
               onClick={() => {
                 setActiveTab('casestudies');
                 setSidebarOpen(false);
+                setCaseStudiesPage(1);
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 activeTab === 'casestudies' 
@@ -311,6 +515,26 @@ export default function AdminDashboard() {
               <FileText className="w-5 h-5" />
               <span>Case Studies</span>
               <span className="ml-auto text-xs text-gray-500">{caseStudies.length}</span>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('reviews');
+                setSidebarOpen(false);
+                setReviewsPage(1);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                activeTab === 'reviews' 
+                  ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' 
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <MessageSquare className="w-5 h-5" />
+              <span>Reviews</span>
+              {reviews.filter((r: any) => r.status === 'pending').length > 0 && (
+                <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-yellow-500 text-white rounded-full">
+                  {reviews.filter((r: any) => r.status === 'pending').length}
+                </span>
+              )}
             </button>
           </nav>
         </div>
@@ -347,12 +571,14 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">
-                    {activeTab === 'messages' ? 'Messages' : 'Case Studies'}
+                    {activeTab === 'messages' ? 'Messages' : activeTab === 'reviews' ? 'Reviews' : 'Case Studies'}
                   </h1>
                   <p className="text-sm text-gray-500">
                     {activeTab === 'messages' 
-                      ? `${messages.length} total, ${unreadCount} unread` 
-                      : `${caseStudies.length} case studies`}
+                      ? `${messagesTotal} total, ${unreadCount} unread` 
+                      : activeTab === 'reviews'
+                      ? `${reviewsTotal} total reviews`
+                      : `${caseStudiesTotal} case studies`}
                   </p>
                 </div>
               </div>
@@ -465,7 +691,7 @@ export default function AdminDashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className={`group p-5 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:shadow-lg ${
+                    className={`group p-5 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:shadow-lg overflow-hidden ${
                       msg.is_read 
                         ? 'bg-white/[0.02] border-white/5 hover:border-white/10' 
                         : 'bg-purple-500/5 border-purple-500/20 hover:border-purple-500/40 shadow-lg shadow-purple-500/5'
@@ -477,7 +703,7 @@ export default function AdminDashboard() {
                       }`}>
                         {msg.name.charAt(0).toUpperCase()}
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 overflow-hidden">
                         <div className="flex items-center gap-3 mb-1 flex-wrap">
                           <span className="font-semibold text-white">{msg.name}</span>
                           {!msg.is_read && (
@@ -504,7 +730,41 @@ export default function AdminDashboard() {
                           <span>•</span>
                           <span className="flex-shrink-0">{format(new Date(msg.created_date), 'MMM d, h:mm a')}</span>
                         </div>
-                        <p className="text-gray-300 leading-relaxed mb-3">{msg.message}</p>
+                        <div className="mb-3 break-words">
+                          {(() => {
+                            const words = msg.message.split(' ');
+                            const wordLimit = 20;
+                            const isLong = words.length > wordLimit;
+                            const truncatedText = isLong ? words.slice(0, wordLimit).join(' ') + '...' : msg.message;
+                            const isExpanded = expandedMessageId === msg.id;
+                            
+                            return (
+                              <>
+                                <p 
+                                  className="text-gray-300 leading-relaxed break-words overflow-wrap-anywhere"
+                                  style={{
+                                    wordBreak: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    maxWidth: '100%'
+                                  }}
+                                >
+                                  {isExpanded ? msg.message : truncatedText}
+                                </p>
+                                {isLong && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setExpandedMessageId(isExpanded ? null : msg.id);
+                                    }}
+                                    className="text-xs text-purple-400 hover:text-purple-300 mt-1 transition-colors font-medium"
+                                  >
+                                    {isExpanded ? 'Show less' : 'Show more'}
+                                  </button>
+                                )}
+                              </>
+                            );
+                          })()}
+                        </div>
                         <div className="flex items-center gap-2">
                           <Select
                             value={msg.status || 'Received'}
@@ -545,6 +805,14 @@ export default function AdminDashboard() {
                   </motion.div>
                 ))
               )}
+              {/* Messages Pagination */}
+              {messagesTotal > 0 && messagesTotalPages > 0 && (
+                <Pagination
+                  currentPage={messagesPage}
+                  totalPages={messagesTotalPages}
+                  onPageChange={setMessagesPage}
+                />
+              )}
             </div>
           )}
 
@@ -564,17 +832,69 @@ export default function AdminDashboard() {
                       </div>
                       <h3 className="text-lg font-semibold text-white mb-2">No case studies yet</h3>
                       <p className="text-gray-500 mb-6">Create your first case study to showcase your work</p>
-                      <Button 
-                        onClick={() => setShowForm(true)}
-                        className="bg-gradient-to-r from-purple-600 to-violet-600"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create Case Study
-                      </Button>
+                      <div className="flex gap-4 justify-center">
+                        <Button 
+                          onClick={() => setShowForm(true)}
+                          className="bg-gradient-to-r from-purple-600 to-violet-600"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Case Study
+                        </Button>
+                        <Button
+                          onClick={async () => {
+                            if (confirm('This will add all case studies from the static data file to the database. Continue?')) {
+                              try {
+                                const res = await fetch('/api/case-studies/seed', { method: 'POST' });
+                                const result = await res.json();
+                                if (res.ok) {
+                                  alert(`Success! ${result.added} case studies added, ${result.skipped} skipped.`);
+                                  queryClient.invalidateQueries({ queryKey: ['caseStudies'] });
+                                } else {
+                                  alert(`Error: ${result.message}`);
+                                }
+                              } catch (error: any) {
+                                alert(`Error: ${error.message}`);
+                              }
+                            }
+                          }}
+                          variant="outline"
+                          className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
+                        >
+                          <Database className="w-4 h-4 mr-2" />
+                          Seed from Static Data
+                        </Button>
+                      </div>
                     </div>
                   ) : (
-                    <div className="grid gap-4">
-                      {caseStudies.map((study, idx) => (
+                    <>
+                      {/* Seed Database Button */}
+                      <div className="mb-4 flex justify-end">
+                        <Button
+                          onClick={async () => {
+                            if (confirm('This will add all case studies from the static data file to the database. Continue?')) {
+                              try {
+                                const res = await fetch('/api/case-studies/seed', { method: 'POST' });
+                                const result = await res.json();
+                                if (res.ok) {
+                                  alert(`Success! ${result.added} case studies added, ${result.skipped} skipped.`);
+                                  queryClient.invalidateQueries({ queryKey: ['caseStudies'] });
+                                } else {
+                                  alert(`Error: ${result.message}`);
+                                }
+                              } catch (error: any) {
+                                alert(`Error: ${error.message}`);
+                              }
+                            }
+                          }}
+                          variant="outline"
+                          className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10"
+                        >
+                          <Database className="w-4 h-4 mr-2" />
+                          Seed Database from Static Data
+                        </Button>
+                      </div>
+                      <div className="grid gap-4">
+                        {caseStudies.map((study, idx) => (
                         <motion.div
                           key={study.id}
                           initial={{ opacity: 0, y: 20 }}
@@ -629,7 +949,16 @@ export default function AdminDashboard() {
                           </div>
                         </motion.div>
                       ))}
-                    </div>
+                      </div>
+                      {/* Case Studies Pagination */}
+                      {caseStudiesTotal > 0 && caseStudiesTotalPages > 0 && (
+                        <Pagination
+                          currentPage={caseStudiesPage}
+                          totalPages={caseStudiesTotalPages}
+                          onPageChange={setCaseStudiesPage}
+                        />
+                      )}
+                    </>
                   )}
                 </div>
               ) : (
@@ -646,12 +975,272 @@ export default function AdminDashboard() {
                   removeTechnology={removeTechnology}
                   addOutcome={addOutcome}
                   removeOutcome={removeOutcome}
+                  onImageUpload={handleImageUpload}
+                  uploadingImage={uploadingImage}
                 />
               )}
             </>
           )}
+
+          {/* Reviews Content */}
+          {activeTab === 'reviews' && (
+            <div className="space-y-4">
+              {loadingReviews ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="text-center py-20">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                    <MessageSquare className="w-8 h-8 text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">No reviews yet</h3>
+                  <p className="text-gray-500">Reviews from your website will appear here</p>
+                </div>
+              ) : (
+                <>
+                  {reviews.map((review, idx) => (
+                    <motion.div
+                      key={review.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className={`group p-5 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:shadow-lg overflow-hidden ${
+                        review.status === 'approved'
+                          ? 'bg-emerald-500/5 border-emerald-500/20 hover:border-emerald-500/40'
+                          : review.status === 'rejected'
+                          ? 'bg-red-500/5 border-red-500/20 hover:border-red-500/40'
+                          : 'bg-yellow-500/5 border-yellow-500/20 hover:border-yellow-500/40'
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        {review.imageUrl ? (
+                          <div className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden border border-purple-500/30">
+                            <img 
+                              src={review.imageUrl} 
+                              alt={review.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold ${
+                            review.status === 'approved'
+                              ? 'bg-gradient-to-br from-emerald-600 to-teal-600 text-white'
+                              : review.status === 'rejected'
+                              ? 'bg-gradient-to-br from-red-600 to-rose-600 text-white'
+                              : 'bg-gradient-to-br from-yellow-600 to-amber-600 text-white'
+                          }`}>
+                            {review.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="flex items-center gap-3 mb-1 flex-wrap">
+                            <span className="font-semibold text-white">{review.name}</span>
+                            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                              review.status === 'approved'
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                : review.status === 'rejected'
+                                ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                                : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
+                            }`}>
+                              {review.status.charAt(0).toUpperCase() + review.status.slice(1)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm text-gray-500 mb-3 flex-wrap">
+                            {review.email && (
+                              <>
+                                <a href={`mailto:${review.email}`} className="hover:text-purple-400 transition-colors truncate">
+                                  {review.email}
+                                </a>
+                                <span>•</span>
+                              </>
+                            )}
+                            {(review.role || review.company) && (
+                              <>
+                                <span className="flex-shrink-0">
+                                  {review.role || ''}
+                                  {review.role && review.company && ' at '}
+                                  {review.company || ''}
+                                </span>
+                                <span>•</span>
+                              </>
+                            )}
+                            <span className="flex-shrink-0">{format(new Date(review.created_date), 'MMM d, h:mm a')}</span>
+                          </div>
+                          <div className="flex items-center gap-2 mb-3">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${
+                                  i < review.rating
+                                    ? 'text-yellow-500 fill-yellow-500'
+                                    : 'text-gray-500'
+                                }`}
+                              />
+                            ))}
+                            <span className="text-sm text-gray-400 ml-1">({review.rating}/5)</span>
+                          </div>
+                          <p className="text-gray-300 leading-relaxed mb-3 break-words">
+                            "{review.content}"
+                          </p>
+                          <div className="flex items-center gap-2">
+                            {review.status !== 'approved' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 text-xs bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20"
+                                onClick={() => updateReviewStatusMutation.mutate({ id: review.id, status: 'approved' })}
+                              >
+                                <Check className="w-3 h-3 mr-1" />
+                                Approve
+                              </Button>
+                            )}
+                            {review.status !== 'rejected' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 text-xs bg-red-500/10 border-red-500/30 text-red-300 hover:bg-red-500/20"
+                                onClick={() => updateReviewStatusMutation.mutate({ id: review.id, status: 'rejected' })}
+                              >
+                                <X className="w-3 h-3 mr-1" />
+                                Reject
+                              </Button>
+                            )}
+                            {review.status === 'pending' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 text-xs bg-gray-500/10 border-gray-500/30 text-gray-300 hover:bg-gray-500/20"
+                                onClick={() => updateReviewStatusMutation.mutate({ id: review.id, status: 'pending' })}
+                              >
+                                Reset
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-9 w-9 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                            onClick={() => deleteReviewMutation.mutate(review.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {/* Reviews Pagination */}
+                  {reviewsTotal > 0 && reviewsTotalPages > 0 && (
+                    <Pagination
+                      currentPage={reviewsPage}
+                      totalPages={reviewsTotalPages}
+                      onPageChange={setReviewsPage}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </main>
+    </div>
+  );
+}
+
+function Pagination({ currentPage, totalPages, onPageChange }: { currentPage: number; totalPages: number; onPageChange: (page: number) => void }) {
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
+  return (
+    <div className="flex items-center justify-center gap-2 mt-6">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="bg-white/5 border-white/10 text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Previous
+      </Button>
+      
+      <div className="flex items-center gap-1">
+        {getPageNumbers().map((page, idx) => {
+          if (page === '...') {
+            return (
+              <span key={`ellipsis-${idx}`} className="px-2 text-gray-500">
+                ...
+              </span>
+            );
+          }
+          
+          const pageNum = page as number;
+          return (
+            <Button
+              key={pageNum}
+              variant={currentPage === pageNum ? "default" : "outline"}
+              size="sm"
+              onClick={() => onPageChange(pageNum)}
+              className={
+                currentPage === pageNum
+                  ? "bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white border-0"
+                  : "bg-white/5 border-white/10 text-white hover:bg-white/10"
+              }
+            >
+              {pageNum}
+            </Button>
+          );
+        })}
+      </div>
+      
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="bg-white/5 border-white/10 text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next
+        <ChevronRight className="w-4 h-4" />
+      </Button>
+      
+      <span className="ml-4 text-sm text-gray-500">
+        Page {currentPage} of {totalPages}
+      </span>
     </div>
   );
 }
@@ -668,7 +1257,9 @@ function CaseStudyForm({
   addTechnology,
   removeTechnology,
   addOutcome,
-  removeOutcome
+  removeOutcome,
+  onImageUpload,
+  uploadingImage
 }) {
   return (
     <form onSubmit={onSubmit} className="space-y-6">
@@ -695,13 +1286,21 @@ function CaseStudyForm({
             </div>
             <div>
               <label className="text-sm text-gray-400 mb-2 block">Platform *</label>
-              <Input
-                value={formData.platform}
-                onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
-                className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 focus:ring-purple-500/20"
-                placeholder="AWS, Azure, GCP..."
-                required
-              />
+              <Select 
+                value={formData.platform} 
+                onValueChange={(v) => setFormData({ ...formData, platform: v })}
+              >
+                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10">
+                  <SelectValue placeholder="Select platform" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#12121a] border-white/10">
+                  {platformOptions.map((platform) => (
+                    <SelectItem key={platform} value={platform} className="text-white focus:bg-white/10 focus:text-white">
+                      {platform}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -716,24 +1315,95 @@ function CaseStudyForm({
             />
           </div>
 
+          {/* Image Upload */}
+          <div>
+            <label className="text-sm text-gray-400 mb-2 block">Case Study Image</label>
+            <div className="space-y-3">
+              {formData.imageUrl && (
+                <div className="relative group">
+                  <img 
+                    src={formData.imageUrl} 
+                    alt="Case study preview" 
+                    className="w-full h-48 object-cover rounded-lg border border-white/10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                    className="absolute top-2 right-2 bg-red-500/80 hover:bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <label className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={onImageUpload}
+                    className="hidden"
+                    disabled={uploadingImage}
+                  />
+                  <div className="flex items-center justify-center gap-2 px-4 py-3 border border-dashed border-white/20 rounded-lg cursor-pointer hover:border-purple-500/50 transition-colors bg-white/5">
+                    {uploadingImage ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                        <span className="text-sm text-gray-400">Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 text-purple-400" />
+                        <span className="text-sm text-gray-400">
+                          {formData.imageUrl ? 'Change Image' : 'Upload Image'}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </label>
+                {formData.imageUrl && (
+                  <Input
+                    type="text"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                    placeholder="Or paste image URL"
+                    className="flex-1 bg-white/5 border-white/10 text-white focus:border-purple-500/50 focus:ring-purple-500/20"
+                  />
+                )}
+              </div>
+              <p className="text-xs text-gray-500">Upload an image or paste a URL. Max size: 10MB</p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm text-gray-400 mb-2 block">Role</label>
-              <Input
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 focus:ring-purple-500/20"
-              />
+              <Select 
+                value={formData.role} 
+                onValueChange={(v) => setFormData({ ...formData, role: v })}
+              >
+                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#12121a] border-white/10">
+                  {roleOptions.map((role) => (
+                    <SelectItem key={role} value={role} className="text-white focus:bg-white/10 focus:text-white">
+                      {role}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="text-sm text-gray-400 mb-2 block">Icon</label>
               <Select value={formData.icon} onValueChange={(v) => setFormData({ ...formData, icon: v })}>
-                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50">
+                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#12121a] border-white/10">
                   {iconOptions.map(icon => (
-                    <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                    <SelectItem key={icon} value={icon} className="text-white focus:bg-white/10 focus:text-white">{icon}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -741,12 +1411,12 @@ function CaseStudyForm({
             <div>
               <label className="text-sm text-gray-400 mb-2 block">Color Theme</label>
               <Select value={formData.gradient} onValueChange={(v) => setFormData({ ...formData, gradient: v })}>
-                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50">
+                <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#12121a] border-white/10">
                   {gradientOptions.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    <SelectItem key={opt.value} value={opt.value} className="text-white focus:bg-white/10 focus:text-white">{opt.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -812,33 +1482,97 @@ function CaseStudyForm({
               </Button>
             </div>
             <div className="space-y-3">
-              {formData.technologies.map((tech, idx) => (
-                <div key={idx} className="flex gap-2">
-                  <Input
-                    placeholder="Category (e.g., Cloud)"
-                    value={tech.category}
-                    onChange={(e) => {
-                      const newTechs = [...formData.technologies];
-                      newTechs[idx].category = e.target.value;
-                      setFormData({ ...formData, technologies: newTechs });
-                    }}
-                    className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 w-1/3"
-                  />
-                  <Input
-                    placeholder="Value (e.g., AWS, EKS, Lambda)"
-                    value={tech.value}
-                    onChange={(e) => {
-                      const newTechs = [...formData.technologies];
-                      newTechs[idx].value = e.target.value;
-                      setFormData({ ...formData, technologies: newTechs });
-                    }}
-                    className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 flex-1"
-                  />
-                  <Button type="button" size="icon" variant="ghost" className="text-red-400" onClick={() => removeTechnology(idx)}>
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
+              {formData.technologies.map((tech, idx) => {
+                const categoryOptions = tech.category ? technologyValueOptions[tech.category] || [] : [];
+                const isUsingCustomInput = tech.value === "__custom__" || tech.category === "Other";
+                const showCustomInput = isUsingCustomInput || (tech.value && !categoryOptions.includes(tech.value) && tech.value !== "");
+                
+                return (
+                  <div key={idx} className="flex gap-2">
+                    <Select
+                      value={tech.category}
+                      onValueChange={(v) => {
+                        const newTechs = [...formData.technologies];
+                        newTechs[idx].category = v;
+                        // Reset value when category changes
+                        newTechs[idx].value = '';
+                        setFormData({ ...formData, technologies: newTechs });
+                      }}
+                    >
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10 w-1/3">
+                        <SelectValue placeholder="Category" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#12121a] border-white/10">
+                        {technologyCategoryOptions.map((category) => (
+                          <SelectItem key={category} value={category} className="text-white focus:bg-white/10 focus:text-white">
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {showCustomInput ? (
+                      <Input
+                        placeholder="Enter technology name"
+                        value={tech.value === "__custom__" ? "" : tech.value}
+                        onChange={(e) => {
+                          const newTechs = [...formData.technologies];
+                          newTechs[idx].value = e.target.value;
+                          setFormData({ ...formData, technologies: newTechs });
+                        }}
+                        className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 flex-1"
+                      />
+                    ) : (
+                      <Select
+                        value={tech.value}
+                        onValueChange={(v) => {
+                          const newTechs = [...formData.technologies];
+                          if (v === "__custom__") {
+                            newTechs[idx].value = "__custom__";
+                          } else {
+                            newTechs[idx].value = v;
+                          }
+                          setFormData({ ...formData, technologies: newTechs });
+                        }}
+                        disabled={!tech.category}
+                      >
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white focus:border-purple-500/50 hover:bg-white/10 flex-1">
+                          <SelectValue placeholder={tech.category ? "Select technology" : "Select category first"} />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#12121a] border-white/10">
+                          {tech.category && categoryOptions.length > 0 && (
+                            <>
+                              {categoryOptions.map((value) => (
+                                <SelectItem key={value} value={value} className="text-white focus:bg-white/10 focus:text-white">
+                                  {value}
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="__custom__" className="text-purple-400 focus:bg-purple-500/20 focus:text-purple-300">+ Custom value</SelectItem>
+                            </>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {showCustomInput && tech.category !== "Other" && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="text-purple-400"
+                        onClick={() => {
+                          const newTechs = [...formData.technologies];
+                          newTechs[idx].value = '';
+                          setFormData({ ...formData, technologies: newTechs });
+                        }}
+                      >
+                        Use dropdown
+                      </Button>
+                    )}
+                    <Button type="button" size="icon" variant="ghost" className="text-red-400" onClick={() => removeTechnology(idx)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

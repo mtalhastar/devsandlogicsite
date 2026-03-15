@@ -73,10 +73,10 @@ export default function AboutSection() {
               <div className="absolute inset-8 rounded-full border border-purple-500/40" />
               
               {/* Center globe */}
-              <div className="absolute inset-16 rounded-full bg-gradient-to-br from-purple-600/30 to-violet-600/30 backdrop-blur-sm flex flex-col gap-6 items-center justify-center border border-purple-500/50">
+              <div className="absolute inset-16 rounded-full bg-gradient-to-br from-purple-600/30 to-violet-600/30 backdrop-blur-sm flex flex-col md:gap-6 gap-3 items-center justify-center border border-purple-500/50">
                 {/* <Globe className="w-24 h-24 text-purple-400" /> */}
                  <Image src={`/owner.png`} alt={"Owner"} width={150} height={150} className='rounded-full'/>
-                 <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent text-xs w-full text-center font-medium">
+                 <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent text-[0.4rem]  md:text-xs w-full text-center font-medium">
                 Founder Muhammad Talha
               </span>
               </div>

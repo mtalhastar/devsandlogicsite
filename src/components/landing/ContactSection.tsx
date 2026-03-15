@@ -29,14 +29,28 @@ export default function ContactSection() {
     }
 
     // Option 2: Create a Google Calendar event with pre-filled details
-    // You can customize these details
-    const eventTitle = encodeURIComponent('Consultation Call - Devs & Logic');
-    const eventDetails = encodeURIComponent('Let\'s discuss your project and how we can help bring your ideas to life.');
-    const eventLocation = encodeURIComponent('Online Meeting');
-    const eventDuration = 30; // Duration in minutes
+    // All values come from environment variables for easy customization
+    const eventTitle = encodeURIComponent(
+      process.env.NEXT_PUBLIC_CALENDAR_EVENT_TITLE || 'Consultation Call'
+    );
+    const eventDetails = encodeURIComponent(
+      process.env.NEXT_PUBLIC_CALENDAR_EVENT_DETAILS || 'Let\'s discuss your project and how we can help bring your ideas to life.'
+    );
+    const eventLocation = encodeURIComponent(
+      process.env.NEXT_PUBLIC_CALENDAR_EVENT_LOCATION || 'Online Meeting'
+    );
+    const eventDuration = parseInt(
+      process.env.NEXT_PUBLIC_CALENDAR_EVENT_DURATION || '30',
+      10
+    ); // Duration in minutes
     
-    // Get your email from environment or use default
-    const yourEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'mtalhastar@gmail.com';
+    // Get your email from environment variable (required)
+    const yourEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
+    
+    if (!yourEmail) {
+      console.error('NEXT_PUBLIC_CONTACT_EMAIL is not set in environment variables');
+      return;
+    }
     
     // Create Google Calendar event URL
     const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=now/${new Date(Date.now() + eventDuration * 60000).toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${eventDetails}&location=${eventLocation}&add=${yourEmail}`;
@@ -74,35 +88,35 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-24 bg-black relative overflow-hidden">
+    <section id="contact" className="py-12 sm:py-16 md:py-24 bg-black relative overflow-x-hidden">
       {/* Background elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-violet-600/10 rounded-full blur-3xl" />
+      <div className="absolute top-0 right-0 w-[300px] sm:w-[400px] md:w-[500px] h-[300px] sm:h-[400px] md:h-[500px] bg-purple-600/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-[250px] sm:w-[300px] md:w-[400px] h-[250px] sm:h-[300px] md:h-[400px] bg-violet-600/10 rounded-full blur-3xl" />
       
-      <div className="container mx-auto px-6 lg:px-12 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-12 relative z-10 max-w-full overflow-x-hidden">
         {/* CTA Banner */}
         <SectionAnimation>
-          <div className="text-center mb-20 p-12 rounded-3xl bg-gradient-to-br from-purple-600/20 to-violet-600/20 border border-purple-500/20 backdrop-blur-sm">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+          <div className="text-center mb-12 md:mb-20 p-6 sm:p-8 md:p-12 rounded-2xl md:rounded-3xl bg-gradient-to-br from-purple-600/20 to-violet-600/20 border border-purple-500/20 backdrop-blur-sm">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 md:mb-6">
               Ready to Build Something
               <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent"> Amazing?</span>
             </h2>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
+            <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto mb-6 md:mb-8 px-2">
               Let's discuss how we can help transform your ideas into successful digital products.
             </p>
             <Button 
               size="lg"
               onClick={handleBookCall}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-6 rounded-full text-lg font-medium"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 sm:px-8 py-4 sm:py-6 rounded-full text-base sm:text-lg font-medium"
             >
               Book a Call
-              <ArrowRight className="ml-2 w-5 h-5" />
+              <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </div>
         </SectionAnimation>
 
         <SectionAnimation>
-          <div className="grid lg:grid-cols-2 gap-16">
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16">
             {/* Contact Info */}
             <motion.div
               initial={{ opacity: 0, x: -40 }}
@@ -110,65 +124,55 @@ export default function ContactSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h3 className="text-3xl font-bold text-white mb-6">Get in Touch</h3>
-              <p className="text-gray-400 text-lg mb-10">
+              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4 md:mb-6">Get in Touch</h3>
+              <p className="text-gray-400 text-base sm:text-lg mb-6 md:mb-10">
                 Have a project in mind? We'd love to hear about it. 
                 Reach out and let's start a conversation.
               </p>
 
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                    <Mail className="w-6 h-6 text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-sm">Email</p>
-                    <p className="text-white"> admin@devsandlogics.com</p>
-                  </div>
+              <div className="flex flex-wrap gap-4 sm:gap-6 justify-start">
+                <a 
+                  href="mailto:admin@devsandlogics.com"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 flex items-center justify-center hover:bg-purple-500/20 hover:scale-105 transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30 group"
+                  aria-label="Email Us"
+                >
+                  <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 group-hover:text-purple-300" />
+                </a>
+
+                <a 
+                  href="tel:+923019497401"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 flex items-center justify-center hover:bg-purple-500/20 hover:scale-105 transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30 group"
+                  aria-label="Call Us"
+                >
+                  <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 group-hover:text-purple-300" />
+                </a>
+
+                <div 
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 flex items-center justify-center border border-purple-500/10 cursor-help group relative"
+                  title="Remote-First, Worldwide"
+                >
+                  <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 group-hover:text-purple-300" />
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                    <Phone className="w-6 h-6 text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-gray-500 text-sm">Phone</p>
-                    <p className="text-white">+923019497401</p>
-                  </div>
-                </div>
+                <a 
+                  href="https://www.linkedin.com/in/muhammad-talha-845270230/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 flex items-center justify-center hover:bg-purple-500/20 hover:scale-105 transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30 group"
+                  aria-label="LinkedIn Profile"
+                >
+                  <LinkedinIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 group-hover:text-purple-300" />
+                </a>
 
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                    <MapPin className="w-6 h-6 text-purple-400" />
-                  </div>
-                  
-                  <div>
-                    <p className="text-gray-500 text-sm">Location</p>
-                    <p className="text-white">Remote-First, Worldwide</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                    <LinkedinIcon className="w-6 h-6 text-purple-400" />
-                  </div>
-                  
-                  <div>
-                    <p className="text-gray-500 text-sm">LinkedIn</p>
-                    <p className="text-white">https://www.linkedin.com/in/muhammad-talha-845270230/</p>
-                  </div>
-                </div>
-
-                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                    <TbBrandFiverr className="w-6 h-6 text-purple-400" />
-                  </div>
-                  
-                  <div>
-                    <p className="text-gray-500 text-sm">Fiverr</p>
-                    <p className="text-white">https://www.fiverr.com/s/yvg4r55</p>
-                  </div>
-                </div>
+                <a 
+                  href="https://www.fiverr.com/s/yvg4r55" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-500/10 flex items-center justify-center hover:bg-purple-500/20 hover:scale-105 transition-all duration-300 border border-purple-500/10 hover:border-purple-500/30 group"
+                  aria-label="Fiverr Profile"
+                >
+                  <TbBrandFiverr className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400 group-hover:text-purple-300" />
+                </a>
               </div>
             </motion.div>
 
@@ -179,13 +183,13 @@ export default function ContactSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 <div>
                   <Input
                     placeholder="Your Name"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 h-14 rounded-xl focus:border-purple-500"
+                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 h-12 sm:h-14 rounded-xl focus:border-purple-500 w-full max-w-full"
                     required
                   />
                 </div>
@@ -195,7 +199,7 @@ export default function ContactSection() {
                     placeholder="Your Email"
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 h-14 rounded-xl focus:border-purple-500"
+                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 h-12 sm:h-14 rounded-xl focus:border-purple-500 w-full max-w-full"
                     required
                   />
                 </div>
@@ -205,7 +209,7 @@ export default function ContactSection() {
                     placeholder="Your Phone (Optional)"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 h-14 rounded-xl focus:border-purple-500"
+                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 h-12 sm:h-14 rounded-xl focus:border-purple-500 w-full max-w-full"
                   />
                 </div>
                 <div>
@@ -214,7 +218,7 @@ export default function ContactSection() {
                     placeholder="Company Name (Optional)"
                     value={formData.company}
                     onChange={(e) => setFormData({...formData, company: e.target.value})}
-                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 h-14 rounded-xl focus:border-purple-500"
+                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 h-12 sm:h-14 rounded-xl focus:border-purple-500 w-full max-w-full"
                   />
                 </div>
                 <div>
@@ -222,7 +226,7 @@ export default function ContactSection() {
                     placeholder="Tell us about your project..."
                     value={formData.message}
                     onChange={(e) => setFormData({...formData, message: e.target.value})}
-                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 min-h-[150px] rounded-xl focus:border-purple-500 resize-none"
+                    className="bg-purple-500/5 border-purple-500/20 text-white placeholder:text-gray-500 min-h-[120px] sm:min-h-[150px] rounded-xl focus:border-purple-500 resize-none w-full max-w-full"
                     required
                   />
                 </div>
@@ -230,17 +234,17 @@ export default function ContactSection() {
                   type="submit"
                   size="lg"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white h-14 rounded-xl text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white h-12 sm:h-14 rounded-xl text-base sm:text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                      <Loader2 className="mr-2 w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                       Sending...
                     </>
                   ) : (
                     <>
                       Send Message
-                      <Send className="ml-2 w-5 h-5" />
+                      <Send className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
                     </>
                   )}
                 </Button>
