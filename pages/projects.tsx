@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Header from '@/components/Header';
+import { getKeywordsMetaString } from '@/data/keywords';
 import Footer from '@/components/Footer';
 import CTA from '@/components/CTA';
 import { motion } from 'framer-motion';
@@ -178,6 +179,7 @@ const ProjectsPage = () => {
       <Head>
         <title>Our Projects | Devs & Logic | SaaS & MVP Portfolio</title>
         <meta name="description" content="Explore our portfolio of successful SaaS applications and MVPs. See how Devs & Logic has helped businesses grow with custom software solutions." />
+        <meta name="keywords" content={getKeywordsMetaString('/projects', 25)} />
       </Head>
       <Header />
       <main>

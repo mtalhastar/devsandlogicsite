@@ -1,0 +1,330 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.wrap { padding: 1rem 0; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+.filter-btn { padding: 5px 12px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-secondary); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+.filter-btn.active { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); font-weight: 500; }
+.search-row { display: flex; gap: 8px; margin-bottom: 1rem; }
+.search-row input { flex: 1; padding: 7px 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); font-size: 14px; }
+.stats { display: flex; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
+.stat { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 8px 14px; font-size: 13px; color: var(--color-text-secondary); }
+.stat strong { color: var(--color-text-primary); font-weight: 500; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 8px 10px; background: var(--color-background-secondary); color: var(--color-text-secondary); font-weight: 500; border-bottom: 0.5px solid var(--color-border-tertiary); white-space: nowrap; cursor: pointer; user-select: none; }
+th:hover { color: var(--color-text-primary); }
+td { padding: 7px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--color-background-secondary); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+.intent-transactional { background: #EAF3DE; color: #27500A; }
+.intent-commercial { background: #E6F1FB; color: #0C447C; }
+.intent-informational { background: #FAEEDA; color: #633806; }
+.intent-navigational { background: #EEEDFE; color: #3C3489; }
+.diff-low { background: #EAF3DE; color: #27500A; }
+.diff-medium { background: #FAEEDA; color: #633806; }
+.diff-high { background: #FCEBEB; color: #791F1F; }
+.cat-badge { padding: 2px 7px; border-radius: 8px; font-size: 11px; font-weight: 500; }
+.kw { font-weight: 400; color: var(--color-text-primary); }
+.vol { color: var(--color-text-secondary); font-size: 12px; }
+.empty { text-align: center; padding: 2rem; color: var(--color-text-secondary); font-size: 14px; }
+.section-head { padding: 6px 10px; background: var(--color-background-tertiary); font-weight: 500; font-size: 12px; color: var(--color-text-secondary); letter-spacing: 0.04em; text-transform: uppercase; }
+</style>
+
+<div class="wrap">
+<div class="search-row">
+  <input type="text" id="searchInput" placeholder="Search keywords..." oninput="render()">
+</div>
+<div class="filters" id="catFilters"></div>
+<div class="filters" id="intentFilters"></div>
+<div class="stats" id="stats"></div>
+<div style="overflow-x: auto;">
+<table>
+  <thead>
+    <tr>
+      <th onclick="sortBy('kw')">Keyword ↕</th>
+      <th onclick="sortBy('vol')">Volume ↕</th>
+      <th onclick="sortBy('diff')">Difficulty ↕</th>
+      <th>Intent</th>
+      <th>Category</th>
+      <th>Target Page</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+</div>
+
+<script>
+const CATS = {
+  "Core Services": "#B5D4F4",
+  "SaaS & MVP": "#9FE1CB",
+  "Web Dev": "#C0DD97",
+  "Mobile": "#FAC775",
+  "AI & ML": "#CECBF6",
+  "Cloud & DevOps": "#B5D4F4",
+  "UI/UX": "#F4C0D1",
+  "Tech Stack": "#D3D1C7",
+  "Industry Vertical": "#F5C4B3",
+  "Hiring": "#FAC775",
+  "Pricing": "#C0DD97",
+  "Location": "#9FE1CB",
+  "Blog / Info": "#FAEEDA",
+  "Comparison": "#E6F1FB",
+  "Competitor Alt": "#F4C0D1"
+};
+
+const CAT_TEXT = {
+  "Core Services": "#0C447C",
+  "SaaS & MVP": "#085041",
+  "Web Dev": "#27500A",
+  "Mobile": "#633806",
+  "AI & ML": "#3C3489",
+  "Cloud & DevOps": "#0C447C",
+  "UI/UX": "#72243E",
+  "Tech Stack": "#444441",
+  "Industry Vertical": "#712B13",
+  "Hiring": "#633806",
+  "Pricing": "#27500A",
+  "Location": "#085041",
+  "Blog / Info": "#633806",
+  "Comparison": "#0C447C",
+  "Competitor Alt": "#72243E"
+};
+
+const data = [
+  {kw:"software development agency",vol:"27,100",diff:"High",intent:"Transactional",cat:"Core Services",page:"Homepage"},
+  {kw:"custom software development company",vol:"8,100",diff:"High",intent:"Transactional",cat:"Core Services",page:"Homepage"},
+  {kw:"software development company",vol:"40,500",diff:"High",intent:"Transactional",cat:"Core Services",page:"Homepage"},
+  {kw:"software development services",vol:"18,000",diff:"High",intent:"Commercial",cat:"Core Services",page:"Services Hub"},
+  {kw:"software development outsourcing",vol:"12,000",diff:"High",intent:"Commercial",cat:"Core Services",page:"Services Hub"},
+  {kw:"hire software developers",vol:"6,600",diff:"High",intent:"Transactional",cat:"Core Services",page:"Contact"},
+  {kw:"offshore software development company",vol:"9,900",diff:"High",intent:"Commercial",cat:"Core Services",page:"About / Services"},
+  {kw:"IT outsourcing company",vol:"14,800",diff:"High",intent:"Commercial",cat:"Core Services",page:"Services Hub"},
+  {kw:"nearshore software development",vol:"2,900",diff:"Medium",intent:"Commercial",cat:"Core Services",page:"Services Hub"},
+  {kw:"dedicated development team",vol:"4,400",diff:"Medium",intent:"Transactional",cat:"Core Services",page:"Services Hub"},
+  {kw:"staff augmentation services",vol:"5,400",diff:"Medium",intent:"Commercial",cat:"Core Services",page:"Services Hub"},
+  {kw:"software development partner",vol:"1,600",diff:"Medium",intent:"Commercial",cat:"Core Services",page:"About"},
+  {kw:"end to end software development",vol:"1,200",diff:"Low",intent:"Commercial",cat:"Core Services",page:"Services Hub"},
+  {kw:"full cycle software development",vol:"880",diff:"Low",intent:"Commercial",cat:"Core Services",page:"Services Hub"},
+  {kw:"custom software development for startups",vol:"1,300",diff:"Low",intent:"Commercial",cat:"Core Services",page:"Services Hub"},
+  {kw:"software development agency for small business",vol:"720",diff:"Low",intent:"Commercial",cat:"Core Services",page:"Services Hub"},
+  {kw:"enterprise software development company",vol:"3,600",diff:"High",intent:"Commercial",cat:"Core Services",page:"Services Hub"},
+  {kw:"SaaS MVP development",vol:"2,400",diff:"Medium",intent:"Transactional",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"MVP development company",vol:"1,300",diff:"Medium",intent:"Transactional",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"SaaS development company",vol:"3,200",diff:"Medium",intent:"Transactional",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"build SaaS product",vol:"1,600",diff:"Medium",intent:"Transactional",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"SaaS application development",vol:"2,200",diff:"Medium",intent:"Commercial",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"MVP software development",vol:"1,900",diff:"Medium",intent:"Transactional",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"hire SaaS developer",vol:"590",diff:"Low",intent:"Transactional",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"build MVP for startup",vol:"1,100",diff:"Low",intent:"Transactional",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"how to build a SaaS MVP",vol:"2,900",diff:"Low",intent:"Informational",cat:"SaaS & MVP",page:"Blog"},
+  {kw:"SaaS MVP checklist",vol:"720",diff:"Low",intent:"Informational",cat:"SaaS & MVP",page:"Blog"},
+  {kw:"SaaS product development timeline",vol:"480",diff:"Low",intent:"Informational",cat:"SaaS & MVP",page:"Blog"},
+  {kw:"SaaS startup development",vol:"1,400",diff:"Medium",intent:"Commercial",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"minimum viable product development",vol:"3,600",diff:"Medium",intent:"Commercial",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"SaaS MVP agency",vol:"390",diff:"Low",intent:"Transactional",cat:"SaaS & MVP",page:"/services/saas-mvp-development/"},
+  {kw:"web development company",vol:"40,500",diff:"High",intent:"Transactional",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"web application development company",vol:"8,100",diff:"High",intent:"Transactional",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"web development agency",vol:"18,000",diff:"High",intent:"Transactional",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"custom web development services",vol:"6,600",diff:"Medium",intent:"Commercial",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"Next.js development company",vol:"1,600",diff:"Medium",intent:"Transactional",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"React development agency",vol:"2,200",diff:"Medium",intent:"Transactional",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"Node.js development company",vol:"2,900",diff:"Medium",intent:"Transactional",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"full stack web development company",vol:"3,600",diff:"Medium",intent:"Transactional",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"web platform development",vol:"1,100",diff:"Low",intent:"Commercial",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"progressive web app development",vol:"2,400",diff:"Medium",intent:"Commercial",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"ecommerce development company",vol:"14,800",diff:"High",intent:"Transactional",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"hire web developers",vol:"8,100",diff:"High",intent:"Transactional",cat:"Web Dev",page:"/services/web-development/"},
+  {kw:"mobile app development company",vol:"27,100",diff:"High",intent:"Transactional",cat:"Mobile",page:"/services/mobile-app-development/"},
+  {kw:"iOS app development company",vol:"9,900",diff:"High",intent:"Transactional",cat:"Mobile",page:"/services/mobile-app-development/"},
+  {kw:"Android app development company",vol:"8,100",diff:"High",intent:"Transactional",cat:"Mobile",page:"/services/mobile-app-development/"},
+  {kw:"React Native development company",vol:"3,600",diff:"Medium",intent:"Transactional",cat:"Mobile",page:"/services/mobile-app-development/"},
+  {kw:"cross platform app development",vol:"4,400",diff:"Medium",intent:"Commercial",cat:"Mobile",page:"/services/mobile-app-development/"},
+  {kw:"hire mobile app developer",vol:"5,400",diff:"High",intent:"Transactional",cat:"Mobile",page:"/services/mobile-app-development/"},
+  {kw:"Flutter app development company",vol:"2,900",diff:"Medium",intent:"Transactional",cat:"Mobile",page:"/services/mobile-app-development/"},
+  {kw:"mobile app development for startups",vol:"1,300",diff:"Low",intent:"Commercial",cat:"Mobile",page:"/services/mobile-app-development/"},
+  {kw:"on demand app development",vol:"1,900",diff:"Medium",intent:"Commercial",cat:"Mobile",page:"/services/mobile-app-development/"},
+  {kw:"AI development company",vol:"9,900",diff:"High",intent:"Transactional",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"AI software development",vol:"3,200",diff:"Medium",intent:"Commercial",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"machine learning development company",vol:"2,400",diff:"Medium",intent:"Transactional",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"ChatGPT integration services",vol:"1,600",diff:"Medium",intent:"Transactional",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"LLM integration services",vol:"1,100",diff:"Medium",intent:"Transactional",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"AI automation agency",vol:"1,900",diff:"Medium",intent:"Transactional",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"generative AI development",vol:"2,900",diff:"Medium",intent:"Commercial",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"AI integration for business",vol:"1,400",diff:"Low",intent:"Commercial",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"AI SaaS development",vol:"880",diff:"Low",intent:"Transactional",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"build AI powered app",vol:"1,200",diff:"Low",intent:"Transactional",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"OpenAI API integration",vol:"2,200",diff:"Low",intent:"Transactional",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"RPA development company",vol:"1,600",diff:"Medium",intent:"Commercial",cat:"AI & ML",page:"/services/ai-solutions/"},
+  {kw:"DevOps services company",vol:"5,400",diff:"High",intent:"Transactional",cat:"Cloud & DevOps",page:"/services/cloud-devops/"},
+  {kw:"cloud migration services",vol:"8,100",diff:"High",intent:"Commercial",cat:"Cloud & DevOps",page:"/services/cloud-devops/"},
+  {kw:"AWS DevOps services",vol:"2,900",diff:"Medium",intent:"Transactional",cat:"Cloud & DevOps",page:"/services/cloud-devops/"},
+  {kw:"CI/CD pipeline setup",vol:"1,300",diff:"Low",intent:"Transactional",cat:"Cloud & DevOps",page:"/services/cloud-devops/"},
+  {kw:"cloud infrastructure services",vol:"4,400",diff:"High",intent:"Commercial",cat:"Cloud & DevOps",page:"/services/cloud-devops/"},
+  {kw:"DevOps consulting company",vol:"2,200",diff:"Medium",intent:"Transactional",cat:"Cloud & DevOps",page:"/services/cloud-devops/"},
+  {kw:"Kubernetes consulting services",vol:"1,400",diff:"Medium",intent:"Transactional",cat:"Cloud & DevOps",page:"/services/cloud-devops/"},
+  {kw:"cloud native development company",vol:"880",diff:"Low",intent:"Commercial",cat:"Cloud & DevOps",page:"/services/cloud-devops/"},
+  {kw:"serverless architecture development",vol:"720",diff:"Low",intent:"Commercial",cat:"Cloud & DevOps",page:"/services/cloud-devops/"},
+  {kw:"UI UX design agency",vol:"9,900",diff:"High",intent:"Transactional",cat:"UI/UX",page:"/services/ui-ux-design/"},
+  {kw:"UX design company",vol:"6,600",diff:"High",intent:"Transactional",cat:"UI/UX",page:"/services/ui-ux-design/"},
+  {kw:"product design agency",vol:"3,600",diff:"Medium",intent:"Transactional",cat:"UI/UX",page:"/services/ui-ux-design/"},
+  {kw:"SaaS UI design",vol:"1,300",diff:"Low",intent:"Commercial",cat:"UI/UX",page:"/services/ui-ux-design/"},
+  {kw:"mobile UI UX design services",vol:"1,900",diff:"Medium",intent:"Commercial",cat:"UI/UX",page:"/services/ui-ux-design/"},
+  {kw:"branding agency for tech company",vol:"1,100",diff:"Low",intent:"Commercial",cat:"UI/UX",page:"/services/ui-ux-design/"},
+  {kw:"hire UX designer",vol:"2,200",diff:"Medium",intent:"Transactional",cat:"UI/UX",page:"/services/ui-ux-design/"},
+  {kw:"web design and development company",vol:"22,200",diff:"High",intent:"Transactional",cat:"UI/UX",page:"/services/ui-ux-design/"},
+  {kw:"Next.js agency",vol:"1,400",diff:"Medium",intent:"Transactional",cat:"Tech Stack",page:"/services/web-development/"},
+  {kw:"React.js development company",vol:"3,600",diff:"Medium",intent:"Transactional",cat:"Tech Stack",page:"/services/web-development/"},
+  {kw:"Node.js backend development",vol:"1,900",diff:"Low",intent:"Commercial",cat:"Tech Stack",page:"/services/web-development/"},
+  {kw:"TypeScript development services",vol:"880",diff:"Low",intent:"Commercial",cat:"Tech Stack",page:"/services/web-development/"},
+  {kw:"MERN stack development company",vol:"1,300",diff:"Low",intent:"Transactional",cat:"Tech Stack",page:"/services/web-development/"},
+  {kw:"PostgreSQL developer for hire",vol:"590",diff:"Low",intent:"Transactional",cat:"Tech Stack",page:"Contact"},
+  {kw:"GraphQL API development",vol:"720",diff:"Low",intent:"Commercial",cat:"Tech Stack",page:"/services/web-development/"},
+  {kw:"microservices development company",vol:"1,600",diff:"Medium",intent:"Commercial",cat:"Tech Stack",page:"/services/cloud-devops/"},
+  {kw:"fintech app development company",vol:"2,900",diff:"Medium",intent:"Transactional",cat:"Industry Vertical",page:"/industries/fintech/"},
+  {kw:"healthcare software development",vol:"3,600",diff:"High",intent:"Transactional",cat:"Industry Vertical",page:"/industries/healthcare/"},
+  {kw:"edtech app development",vol:"1,300",diff:"Low",intent:"Transactional",cat:"Industry Vertical",page:"/industries/edtech/"},
+  {kw:"real estate software development",vol:"1,900",diff:"Medium",intent:"Transactional",cat:"Industry Vertical",page:"/industries/real-estate/"},
+  {kw:"logistics software development",vol:"1,600",diff:"Medium",intent:"Transactional",cat:"Industry Vertical",page:"/industries/logistics/"},
+  {kw:"marketplace app development",vol:"2,400",diff:"Medium",intent:"Transactional",cat:"Industry Vertical",page:"/industries/"},
+  {kw:"on demand delivery app development",vol:"1,900",diff:"Medium",intent:"Transactional",cat:"Industry Vertical",page:"/industries/"},
+  {kw:"B2B SaaS development company",vol:"1,100",diff:"Low",intent:"Transactional",cat:"Industry Vertical",page:"/services/saas-mvp-development/"},
+  {kw:"hire software development agency",vol:"1,600",diff:"Medium",intent:"Transactional",cat:"Hiring",page:"Homepage / Contact"},
+  {kw:"hire dedicated software developers",vol:"4,400",diff:"High",intent:"Transactional",cat:"Hiring",page:"Contact"},
+  {kw:"hire remote development team",vol:"2,200",diff:"Medium",intent:"Transactional",cat:"Hiring",page:"Contact"},
+  {kw:"hire full stack developer",vol:"8,100",diff:"High",intent:"Transactional",cat:"Hiring",page:"Contact"},
+  {kw:"outsource software development",vol:"6,600",diff:"High",intent:"Transactional",cat:"Hiring",page:"Services Hub"},
+  {kw:"hire React developer",vol:"5,400",diff:"High",intent:"Transactional",cat:"Hiring",page:"Contact"},
+  {kw:"hire Node.js developer",vol:"3,600",diff:"Medium",intent:"Transactional",cat:"Hiring",page:"Contact"},
+  {kw:"hire AI developer",vol:"2,200",diff:"Medium",intent:"Transactional",cat:"Hiring",page:"Contact"},
+  {kw:"software development cost",vol:"3,600",diff:"Medium",intent:"Informational",cat:"Pricing",page:"Blog / Pricing Page"},
+  {kw:"MVP development cost",vol:"2,400",diff:"Medium",intent:"Informational",cat:"Pricing",page:"Blog / Pricing Page"},
+  {kw:"how much does custom software cost",vol:"2,900",diff:"Low",intent:"Informational",cat:"Pricing",page:"Blog"},
+  {kw:"web app development cost",vol:"4,400",diff:"Medium",intent:"Informational",cat:"Pricing",page:"Blog / Pricing Page"},
+  {kw:"mobile app development cost",vol:"9,900",diff:"Medium",intent:"Informational",cat:"Pricing",page:"Blog / Pricing Page"},
+  {kw:"SaaS development cost",vol:"1,300",diff:"Low",intent:"Informational",cat:"Pricing",page:"Blog"},
+  {kw:"offshore development cost per hour",vol:"880",diff:"Low",intent:"Commercial",cat:"Pricing",page:"Blog / Pricing Page"},
+  {kw:"software development company USA",vol:"3,600",diff:"High",intent:"Transactional",cat:"Location",page:"Location Page"},
+  {kw:"software development company UK",vol:"2,900",diff:"High",intent:"Transactional",cat:"Location",page:"Location Page"},
+  {kw:"software development company Australia",vol:"1,900",diff:"Medium",intent:"Transactional",cat:"Location",page:"Location Page"},
+  {kw:"software agency Pakistan",vol:"880",diff:"Low",intent:"Transactional",cat:"Location",page:"Homepage / About"},
+  {kw:"web development company Dubai",vol:"1,600",diff:"Medium",intent:"Transactional",cat:"Location",page:"Location Page"},
+  {kw:"software development company Canada",vol:"1,900",diff:"Medium",intent:"Transactional",cat:"Location",page:"Location Page"},
+  {kw:"best software development companies for startups",vol:"1,900",diff:"Medium",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"how to find a software development agency",vol:"1,300",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"what is a software development agency",vol:"1,600",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"how to build a web app from scratch",vol:"4,400",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"SaaS vs custom software",vol:"1,100",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"software development process steps",vol:"2,900",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"agile software development for startups",vol:"1,400",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"how to outsource software development",vol:"2,200",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"MVP vs prototype",vol:"1,300",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"microservices vs monolith",vol:"2,400",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"REST API vs GraphQL",vol:"3,600",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"Next.js vs React for SaaS",vol:"1,600",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"DevOps best practices for startups",vol:"1,100",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"custom software vs off the shelf",vol:"1,900",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"how long does it take to build a SaaS",vol:"880",diff:"Low",intent:"Informational",cat:"Blog / Info",page:"Blog"},
+  {kw:"Toptal alternative",vol:"2,900",diff:"Medium",intent:"Commercial",cat:"Comparison",page:"Comparison Page"},
+  {kw:"Upwork alternative for software development",vol:"1,300",diff:"Low",intent:"Commercial",cat:"Comparison",page:"Comparison Page"},
+  {kw:"Clutch software agency comparison",vol:"880",diff:"Low",intent:"Commercial",cat:"Comparison",page:"Comparison Page"},
+  {kw:"best software development company 2026",vol:"2,200",diff:"Medium",intent:"Commercial",cat:"Comparison",page:"Blog / Landing"},
+  {kw:"top rated software development agencies",vol:"1,900",diff:"Medium",intent:"Commercial",cat:"Comparison",page:"Blog / Landing"},
+  {kw:"software development company reviews",vol:"1,600",diff:"Medium",intent:"Commercial",cat:"Comparison",page:"Portfolio / About"},
+  {kw:"white label software development",vol:"2,200",diff:"Medium",intent:"Transactional",cat:"Competitor Alt",page:"Services Hub"},
+  {kw:"software development company vs freelancer",vol:"1,100",diff:"Low",intent:"Informational",cat:"Competitor Alt",page:"Blog"},
+  {kw:"agency vs in house development",vol:"720",diff:"Low",intent:"Informational",cat:"Competitor Alt",page:"Blog"},
+];
+
+let catFilter = "All";
+let intentFilter = "All";
+let sortCol = "vol";
+let sortDir = -1;
+
+function volSort(v) {
+  if (!v) return 0;
+  return parseInt(v.replace(/,/g,"")) || 0;
+}
+function diffSort(d) { return {Low:1,Medium:2,High:3}[d]||0; }
+
+function sortBy(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = -1; }
+  render();
+}
+
+function render() {
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  let rows = data.filter(r => {
+    const matchQ = !q || r.kw.toLowerCase().includes(q) || r.cat.toLowerCase().includes(q) || r.page.toLowerCase().includes(q);
+    const matchCat = catFilter === "All" || r.cat === catFilter;
+    const matchIntent = intentFilter === "All" || r.intent === intentFilter;
+    return matchQ && matchCat && matchIntent;
+  });
+
+  rows.sort((a,b) => {
+    let av, bv;
+    if (sortCol === "vol") { av = volSort(a.vol); bv = volSort(b.vol); }
+    else if (sortCol === "diff") { av = diffSort(a.diff); bv = diffSort(b.diff); }
+    else { av = a.kw.toLowerCase(); bv = b.kw.toLowerCase(); return sortDir === 1 ? (av>bv?1:-1) : (av<bv?1:-1); }
+    return sortDir * (av - bv);
+  });
+
+  const tbody = document.getElementById("tbody");
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">No keywords match your filters.</td></tr>';
+  } else {
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td class="kw">${r.kw}</td>
+        <td class="vol">${r.vol}/mo</td>
+        <td><span class="badge diff-${r.diff.toLowerCase()}">${r.diff}</span></td>
+        <td><span class="badge intent-${r.intent.toLowerCase()}">${r.intent}</span></td>
+        <td><span class="cat-badge" style="background:${CATS[r.cat]};color:${CAT_TEXT[r.cat]}">${r.cat}</span></td>
+        <td style="font-size:12px;color:var(--color-text-secondary)">${r.page}</td>
+      </tr>
+    `).join("");
+  }
+
+  const stats = document.getElementById("stats");
+  const total = rows.length;
+  const trans = rows.filter(r=>r.intent==="Transactional").length;
+  const low = rows.filter(r=>r.diff==="Low").length;
+  stats.innerHTML = `
+    <div class="stat"><strong>${total}</strong> keywords shown</div>
+    <div class="stat"><strong>${trans}</strong> transactional</div>
+    <div class="stat"><strong>${low}</strong> low difficulty</div>
+    <div class="stat"><strong>${rows.filter(r=>r.diff==="Medium").length}</strong> medium difficulty</div>
+    <div class="stat"><strong>${rows.filter(r=>r.diff==="High").length}</strong> high difficulty</div>
+  `;
+}
+
+function buildFilters() {
+  const cats = ["All", ...Object.keys(CATS)];
+  const intents = ["All", "Transactional", "Commercial", "Informational"];
+
+  document.getElementById("catFilters").innerHTML = cats.map(c =>
+    `<button class="filter-btn ${catFilter===c?'active':''}" onclick="catFilter='${c}';renderCatBtns();render()">${c}</button>`
+  ).join("");
+
+  document.getElementById("intentFilters").innerHTML = intents.map(i =>
+    `<button class="filter-btn ${intentFilter===i?'active':''}" onclick="intentFilter='${i}';renderIntentBtns();render()">${i}</button>`
+  ).join("");
+}
+
+function renderCatBtns() {
+  document.querySelectorAll("#catFilters .filter-btn").forEach(b => {
+    b.classList.toggle("active", b.textContent === catFilter);
+  });
+}
+function renderIntentBtns() {
+  document.querySelectorAll("#intentFilters .filter-btn").forEach(b => {
+    b.classList.toggle("active", b.textContent === intentFilter);
+  });
+}
+
+buildFilters();
+render();
+</script>

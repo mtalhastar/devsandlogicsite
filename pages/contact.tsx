@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import Head from 'next/head';
 import Header from '@/components/Header';
+import { getKeywordsMetaString } from '@/data/keywords';
 import Footer from '@/components/Footer';
 import Contact from '@/components/Contact';
 import { motion } from 'framer-motion';
@@ -20,7 +21,7 @@ const ContactPage = () => {
       <Head>
         <title>Contact Us | Devs & Logic | SaaS & MVP Development</title>
         <meta name="description" content="Contact Devs & Logic for your SaaS or MVP development needs. Get in touch with our team of experts in New York for a consultation about your project." />
-        <meta name="keywords" content="Best MVP and SaaS Developers in Alabama, Best MVP and SaaS Developers in Alaska, Best MVP and SaaS Developers in Arizona, Best MVP and SaaS Developers in Arkansas, Best MVP and SaaS Developers in California, Best MVP and SaaS Developers in Colorado, Best MVP and SaaS Developers in Connecticut, Best MVP and SaaS Developers in Delaware, Best MVP and SaaS Developers in Florida, Best MVP and SaaS Developers in Georgia, Best MVP and SaaS Developers in Hawaii, Best MVP and SaaS Developers in Idaho, Best MVP and SaaS Developers in Illinois, Best MVP and SaaS Developers in Indiana, Best MVP and SaaS Developers in Iowa, Best MVP and SaaS Developers in Kansas, Best MVP and SaaS Developers in Kentucky, Best MVP and SaaS Developers in Louisiana, Best MVP and SaaS Developers in Maine, Best MVP and SaaS Developers in Maryland, Best MVP and SaaS Developers in Massachusetts, Best MVP and SaaS Developers in Michigan, Best MVP and SaaS Developers in Minnesota, Best MVP and SaaS Developers in Mississippi, Best MVP and SaaS Developers in Missouri, Best MVP and SaaS Developers in Montana, Best MVP and SaaS Developers in Nebraska, Best MVP and SaaS Developers in Nevada, Best MVP and SaaS Developers in New Hampshire, Best MVP and SaaS Developers in New Jersey, Best MVP and SaaS Developers in New Mexico, Best MVP and SaaS Developers in New York, Best MVP and SaaS Developers in North Carolina, Best MVP and SaaS Developers in North Dakota, Best MVP and SaaS Developers in Ohio, Best MVP and SaaS Developers in Oklahoma, Best MVP and SaaS Developers in Oregon, Best MVP and SaaS Developers in Pennsylvania, Best MVP and SaaS Developers in Rhode Island, Best MVP and SaaS Developers in South Carolina, Best MVP and SaaS Developers in South Dakota, Best MVP and SaaS Developers in Tennessee, Best MVP and SaaS Developers in Texas, Best MVP and SaaS Developers in Utah, Best MVP and SaaS Developers in Vermont, Best MVP and SaaS Developers in Virginia, Best MVP and SaaS Developers in Washington, Best MVP and SaaS Developers in West Virginia, Best MVP and SaaS Developers in Wisconsin, Best MVP and SaaS Developers in Wyoming, Best MVP and SaaS Developers in Dubai" />
+        <meta name="keywords" content={getKeywordsMetaString('/contact', 30)} />
       </Head>
       <Header />
       <main>

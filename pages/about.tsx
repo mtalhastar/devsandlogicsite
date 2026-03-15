@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import Head from 'next/head';
 import Header from '@/components/Header';
+import { getKeywordsMetaString } from '@/data/keywords';
 import AboutHero from '@/components/AboutHero';
 import Team from '@/components/Team';
 import Process from '@/components/Process';
@@ -21,6 +22,7 @@ const AboutPage = () => {
       <Head>
         <title>About Us | Devs & Logic | SaaS & MVP Development Team</title>
         <meta name="description" content="Meet the Devs & Logic team - NYC-based experts in SaaS app development and MVP creation. Learn about our process and how we deliver exceptional digital products." />
+        <meta name="keywords" content={getKeywordsMetaString('/about', 25)} />
       </Head>
       <Header />
       <main>

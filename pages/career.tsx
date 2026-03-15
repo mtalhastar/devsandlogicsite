@@ -1,6 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
+import { getKeywordsMetaString } from '@/data/keywords';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +78,7 @@ const CareerPage = () => {
       <Head>
         <title>Careers at Devs & Logic | Join the Best Tech Team</title>
         <meta name="description" content="Join Devs & Logic, the top MVP and SaaS developers. We are looking for talented individuals to help build innovative digital solutions." />
+        <meta name="keywords" content={getKeywordsMetaString('/career', 20)} />
       </Head>
       <Header />
       
